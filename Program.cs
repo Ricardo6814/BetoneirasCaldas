@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 class Produto
 {
@@ -22,45 +23,65 @@ class Aluguel
     public double ValorTotal => Dias * ValorDiaria;
 }
 
+class DividaEmpresa
+{
+    public string Pessoa { get; set; }
+    public string Descricao { get; set; }
+    public double ValorTotal { get; set; }
+    public double ValorPago { get; set; }
+    public DateTime Data { get; set; }
+    public bool Pago { get; set; }
+}
+
 class Program
 {
     static List<Produto> produtos = new List<Produto>();
     static List<Aluguel> alugueis = new List<Aluguel>();
+    static List<DividaEmpresa> dividas = new List<DividaEmpresa>();
 
     static string caminhoProdutos = "produtos.txt";
     static string caminhoAlugueis = "aluguéis.txt";
+    static string caminhoDividas = "dividas.txt";
 
     static void Main()
     {
         CarregarProdutos();
         CarregarAlugueis();
+        CarregarDividas();
 
         while (true)
         {
             Console.Clear();
-            Console.WriteLine("SISTEMA DE ALUGUEL - EMPRESA DE BETONEIRA");
-            Console.WriteLine("=========================================");
+            Console.WriteLine("=== SISTEMA DE ALUGUEL - EMPRESA DE BETONEIRA ===");
             Console.WriteLine("1 - Adicionar Produto");
             Console.WriteLine("2 - Registrar Aluguel");
-            Console.WriteLine("3 - Ver Estoque de Equipamentos");
-            Console.WriteLine("4 - Ver Aluguéis e Dívidas");
-            Console.WriteLine("5 - Gerar Relatório (TXT)");
-            Console.WriteLine("6 - Salvar e Sair");
-            Console.WriteLine("=========================================");
-            Console.Write("Escolha uma opção: ");
-            string opcao = Console.ReadLine();
+            Console.WriteLine("3 - Ver Estoque");
+            Console.WriteLine("4 - Ver Aluguéis");
+            Console.WriteLine("5 - Adicionar Dívida da Empresa");
+            Console.WriteLine("6 - Ver Dívidas da Empresa");
+            Console.WriteLine("7 - Registrar Pagamento de Dívida");
+            Console.WriteLine("8 - Ver Dívidas (Mobile)");
+            Console.WriteLine("9 - Ver Resumo Financeiro");
+            Console.WriteLine("10 - Salvar e Sair");
+            Console.Write("Escolha: ");
+            string op = Console.ReadLine();
 
-            switch (opcao)
+            switch (op)
             {
                 case "1": AdicionarProduto(); break;
                 case "2": RegistrarAluguel(); break;
                 case "3": ListarProdutos(); break;
                 case "4": ListarAlugueis(); break;
-                case "5": GerarRelatorio(); break;
-                case "6":
+                case "5": AdicionarDivida(); break;
+                case "6": ListarDividas(); break;
+                case "7": RegistrarPagamento(); break;
+                case "8": ListarDividasMobile(); break;
+                case "9": ResumoFinanceiro(); break;
+                case "10":
                     SalvarProdutos();
                     SalvarAlugueis();
-                    Console.WriteLine("Dados salvos. Até mais!");
+                    SalvarDividas();
+                    Console.WriteLine("Tudo salvo. Até logo!");
                     return;
                 default: Console.WriteLine("Opção inválida."); break;
             }
@@ -72,209 +93,294 @@ class Program
 
     static void AdicionarProduto()
     {
-        Console.Write("Nome do equipamento: ");
+        Console.Write("Nome: ");
         string nome = Console.ReadLine();
 
-        if (BuscarProduto(nome) != null)
-        {
-            Console.WriteLine("Esse produto já está cadastrado!");
-            return;
-        }
-
         Console.Write("Quantidade disponível: ");
-        if (!int.TryParse(Console.ReadLine(), out int quantidade) || quantidade <= 0)
-        {
-            Console.WriteLine("Quantidade inválida!");
-            return;
-        }
+        int qtd = int.Parse(Console.ReadLine());
 
-        Console.Write("Valor da diária (R$): ");
-        if (!double.TryParse(Console.ReadLine(), NumberStyles.Any, CultureInfo.InvariantCulture, out double valor))
-        {
-            Console.WriteLine("Valor inválido!");
-            return;
-        }
+        Console.Write("Valor da diária: ");
+        double diaria = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
 
-        produtos.Add(new Produto { Nome = nome, QuantidadeDisponivel = quantidade, ValorDiaria = valor });
-        Console.WriteLine("Produto cadastrado com sucesso!");
+        produtos.Add(new Produto { Nome = nome, QuantidadeDisponivel = qtd, ValorDiaria = diaria });
+        Console.WriteLine("Produto adicionado!");
     }
 
     static void RegistrarAluguel()
     {
-        Console.Write("Nome do cliente: ");
+        Console.Write("Cliente: ");
         string cliente = Console.ReadLine();
 
-        Console.Write("Nome do equipamento: ");
-        string nomeProduto = Console.ReadLine();
+        Console.Write("Produto: ");
+        string nome = Console.ReadLine();
 
-        Produto produto = BuscarProduto(nomeProduto);
-        if (produto == null)
+        var p = produtos.Find(x => x.Nome.Equals(nome, StringComparison.OrdinalIgnoreCase));
+        if (p == null)
         {
-            Console.WriteLine("Equipamento não encontrado.");
+            Console.WriteLine("Produto não encontrado.");
             return;
         }
 
         Console.Write("Dias de aluguel: ");
-        if (!int.TryParse(Console.ReadLine(), out int dias) || dias <= 0)
-        {
-            Console.WriteLine("Quantidade inválida!");
-            return;
-        }
+        int dias = int.Parse(Console.ReadLine());
 
         Console.Write("Quantidade a alugar: ");
-        if (!int.TryParse(Console.ReadLine(), out int qtd) || qtd <= 0 || qtd > produto.QuantidadeDisponivel)
+        int qtd = int.Parse(Console.ReadLine());
+
+        Console.Write("Pago? (s/n): ");
+        bool pago = Console.ReadLine().ToLower() == "s";
+
+        if (qtd > p.QuantidadeDisponivel)
         {
-            Console.WriteLine("Quantidade inválida ou indisponível!");
+            Console.WriteLine("Quantidade indisponível.");
             return;
         }
 
-        Console.Write("Foi pago? (s/n): ");
-        bool pago = Console.ReadLine().Trim().ToLower() == "s";
-
-        produto.QuantidadeDisponivel -= qtd;
+        p.QuantidadeDisponivel -= qtd;
 
         for (int i = 0; i < qtd; i++)
         {
             alugueis.Add(new Aluguel
             {
                 Cliente = cliente,
-                Produto = nomeProduto,
+                Produto = nome,
                 Dias = dias,
-                ValorDiaria = produto.ValorDiaria,
+                ValorDiaria = p.ValorDiaria,
                 Pago = pago,
                 Data = DateTime.Now
             });
         }
 
-        Console.WriteLine("Aluguel registrado com sucesso!");
+        Console.WriteLine("Aluguel registrado.");
     }
 
     static void ListarProdutos()
     {
-        Console.WriteLine("\nESTOQUE DE EQUIPAMENTOS");
         foreach (var p in produtos)
         {
-            Console.WriteLine("------------------------------");
-            Console.WriteLine($"Equipamento: {p.Nome}");
-            Console.WriteLine($"Disponíveis: {p.QuantidadeDisponivel}");
-            Console.WriteLine($"Valor Diária: R$ {p.ValorDiaria.ToString("F2", CultureInfo.InvariantCulture)}");
+            Console.WriteLine($"Nome: {p.Nome} | Quantidade: {p.QuantidadeDisponivel} | Diária: R$ {p.ValorDiaria:F2}");
         }
     }
 
     static void ListarAlugueis()
     {
-        Console.WriteLine("\nREGISTROS DE ALUGUÉIS E DÍVIDAS");
         foreach (var a in alugueis)
         {
-            Console.WriteLine("------------------------------");
-            Console.WriteLine($"Cliente: {a.Cliente}");
-            Console.WriteLine($"Equipamento: {a.Produto}");
-            Console.WriteLine($"Dias: {a.Dias}");
-            Console.WriteLine($"Data: {a.Data:dd/MM/yyyy}");
-            Console.WriteLine($"Valor Total: R$ {a.ValorTotal.ToString("F2", CultureInfo.InvariantCulture)}");
-            Console.WriteLine($"Status: {(a.Pago ? "Pago" : "EM ABERTO")}");
+            Console.WriteLine($"Cliente: {a.Cliente} | Produto: {a.Produto} | Dias: {a.Dias} | Data: {a.Data:dd/MM/yyyy} | Total: R$ {a.Dias * a.ValorDiaria:F2} | {(a.Pago ? "Pago" : "Aberto")}");
         }
     }
 
-    static void GerarRelatorio()
+    static void AdicionarDivida()
     {
-        string caminho = "relatorio_alugueis.txt";
+        Console.Write("Pessoa: ");
+        string pessoa = Console.ReadLine();
 
-        using (StreamWriter writer = new StreamWriter(caminho))
+        Console.Write("Descrição: ");
+        string descricao = Console.ReadLine();
+
+        Console.Write("Valor pago: ");
+        double pago = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+
+        Console.Write("Data (dd/mm/yyyy): ");
+        DateTime data = DateTime.ParseExact(Console.ReadLine(), "dd/MM/yyyy", CultureInfo.InvariantCulture);
+
+        Console.Write("Está pago? (s/n): ");
+        bool quitado = Console.ReadLine().ToLower() == "s";
+
+        dividas.Add(new DividaEmpresa
         {
-            writer.WriteLine("RELATÓRIO DE ALUGUÉIS");
-            writer.WriteLine($"Emitido em: {DateTime.Now:dd/MM/yyyy HH:mm}");
-            writer.WriteLine();
+            Pessoa = pessoa,
+            Descricao = descricao,
+            ValorPago = pago,
+            Data = data,
+            Pago = quitado
+        });
 
-            double totalRecebido = 0;
-            double totalAberto = 0;
-
-            foreach (var a in alugueis)
-            {
-                writer.WriteLine($"Cliente: {a.Cliente}");
-                writer.WriteLine($"Equipamento: {a.Produto}");
-                writer.WriteLine($"Dias: {a.Dias}");
-                writer.WriteLine($"Data: {a.Data:dd/MM/yyyy}");
-                writer.WriteLine($"Valor Total: R$ {a.ValorTotal.ToString("F2", CultureInfo.InvariantCulture)}");
-                writer.WriteLine($"Status: {(a.Pago ? "Pago" : "EM ABERTO")}");
-                writer.WriteLine("--------------------------------");
-
-                if (a.Pago) totalRecebido += a.ValorTotal;
-                else totalAberto += a.ValorTotal;
-            }
-
-            writer.WriteLine($"\nTotal Recebido: R$ {totalRecebido:F2}");
-            writer.WriteLine($"Total em Aberto: R$ {totalAberto:F2}");
-        }
-
-        Console.WriteLine($"Relatório gerado: {Path.GetFullPath(caminho)}");
+        Console.WriteLine("Dívida registrada.");
     }
 
-    static Produto BuscarProduto(string nome)
+    // === ITEM 6 atualizado com resumo e TXT ===
+    static void ListarDividas()
     {
-        return produtos.Find(p => p.Nome.Equals(nome, StringComparison.OrdinalIgnoreCase));
+        double total = 0;
+        double totalPago = 0;
+        double totalAberto = 0;
+
+        var linhas = new List<string>();
+
+        foreach (var d in dividas.OrderBy(d => d.Data))
+        {
+            linhas.Add("----------------------------------");
+            linhas.Add($"Pessoa: {d.Pessoa}");
+            linhas.Add($"Descrição: {d.Descricao}");
+            linhas.Add($"Data: {d.Data:dd/MM/yyyy}");
+            linhas.Add($"Valor Total: R$ {d.ValorTotal:F2}");
+            linhas.Add($"Valor Pago:  R$ {d.ValorPago:F2}");
+            linhas.Add($"Status: {(d.Pago ? "Pago" : "Em aberto")}");
+
+            total += d.ValorTotal;
+            totalPago += d.ValorPago;
+        }
+
+        totalAberto = total - totalPago;
+
+        linhas.Add("");
+        linhas.Add("===== RESUMO DAS DÍVIDAS =====");
+        linhas.Add($"Total de Dívidas:   R$ {total:F2}");
+        linhas.Add($"Total Pago:         R$ {totalPago:F2}");
+        linhas.Add($"Total em Aberto:    R$ {totalAberto:F2}");
+
+        // Mostra no console
+        foreach (var linha in linhas)
+            Console.WriteLine(linha);
+
+        // Salva no arquivo txt
+        File.WriteAllLines("dividas_empresa.txt", linhas);
+
+        Console.WriteLine("\nRelatório salvo em dividas_empresa.txt");
+    }
+
+    static void RegistrarPagamento()
+    {
+        Console.Write("Pessoa: ");
+        string pessoa = Console.ReadLine();
+
+        var divida = dividas.FirstOrDefault(d => d.Pessoa.Equals(pessoa, StringComparison.OrdinalIgnoreCase) && !d.Pago);
+        if (divida == null)
+        {
+            Console.WriteLine("Dívida não encontrada ou já quitada.");
+            return;
+        }
+
+        Console.Write("Valor do pagamento: ");
+        double valor = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+
+        divida.ValorPago += valor;
+        if (divida.ValorPago >= divida.ValorTotal)
+            divida.Pago = true;
+
+        Console.WriteLine("Pagamento registrado.");
+    }
+
+    static void ListarDividasMobile()
+    {
+        var linhas = new List<string>();
+        double totalPagas = 0;
+        double totalAberto = 0;
+
+        foreach (var d in dividas.OrderBy(x => x.Data))
+        {
+            linhas.Add($"Pessoa: {d.Pessoa}");
+            linhas.Add($"Data: {d.Data:dd/MM/yyyy}");
+            linhas.Add($"Descrição: {d.Descricao}");
+            linhas.Add($"Valor Pago: R$ {d.ValorPago:F2}");
+            linhas.Add($"Status: {(d.Pago ? "Pago" : "Em aberto")}");
+            linhas.Add("----------------------------------");
+
+            if (d.Pago) totalPagas += d.ValorTotal;
+            else totalAberto += d.ValorTotal;
+        }
+
+        double totalGeral = totalPagas + totalAberto;
+
+        linhas.Add("== RESUMO ==");
+        linhas.Add($"Total Pagas:     R$ {totalPagas:F2}");
+        linhas.Add($"Total Em Aberto: R$ {totalAberto:F2}");
+        linhas.Add($"TOTAL GERAL:     R$ {totalGeral:F2}");
+
+        File.WriteAllLines("dividas_mobile.txt", linhas);
+        foreach (var l in linhas) Console.WriteLine(l);
+    }
+
+    static void ResumoFinanceiro()
+    {
+        double totalAlugueis = alugueis.Sum(a => a.ValorTotal);
+        double recebidos = alugueis.Where(a => a.Pago).Sum(a => a.ValorTotal);
+        double emAberto = totalAlugueis - recebidos;
+
+        double totalDividas = dividas.Sum(d => d.ValorTotal);
+        double dividasPagas = dividas.Sum(d => d.ValorPago);
+
+        var resumo = new List<string>
+        {
+            $"--- RESUMO FINANCEIRO ---",
+            $"Data: {DateTime.Now:dd/MM/yyyy HH:mm}",
+            $"Total Aluguéis:     R$ {totalAlugueis:F2}",
+            $"Recebidos:          R$ {recebidos:F2}",
+            $"Em Aberto:          R$ {emAberto:F2}",
+            $"Total Dívidas:      R$ {totalDividas:F2}",
+            $"Dívidas Pagas:      R$ {dividasPagas:F2}",
+            $"Dívidas em Aberto:  R$ {totalDividas - dividasPagas:F2}",
+            $"Saldo Final:        R$ {recebidos - dividasPagas:F2}"
+        };
+
+        File.WriteAllLines("resumo_financeiro.txt", resumo);
+        foreach (var l in resumo) Console.WriteLine(l);
     }
 
     static void CarregarProdutos()
     {
         if (!File.Exists(caminhoProdutos)) return;
-
         foreach (var linha in File.ReadAllLines(caminhoProdutos))
         {
-            string[] partes = linha.Split(';');
-            if (partes.Length == 3)
-            {
-                produtos.Add(new Produto
-                {
-                    Nome = partes[0],
-                    QuantidadeDisponivel = int.Parse(partes[1]),
-                    ValorDiaria = double.Parse(partes[2], CultureInfo.InvariantCulture)
-                });
-            }
+            var x = linha.Split(';');
+            produtos.Add(new Produto { Nome = x[0], QuantidadeDisponivel = int.Parse(x[1]), ValorDiaria = double.Parse(x[2], CultureInfo.InvariantCulture) });
         }
     }
 
     static void SalvarProdutos()
     {
-        using (var writer = new StreamWriter(caminhoProdutos))
-        {
-            foreach (var p in produtos)
-            {
-                writer.WriteLine($"{p.Nome};{p.QuantidadeDisponivel};{p.ValorDiaria.ToString(CultureInfo.InvariantCulture)}");
-            }
-        }
+        using var sw = new StreamWriter(caminhoProdutos);
+        foreach (var p in produtos)
+            sw.WriteLine($"{p.Nome};{p.QuantidadeDisponivel};{p.ValorDiaria.ToString(CultureInfo.InvariantCulture)}");
     }
 
     static void CarregarAlugueis()
     {
         if (!File.Exists(caminhoAlugueis)) return;
-
         foreach (var linha in File.ReadAllLines(caminhoAlugueis))
         {
-            string[] partes = linha.Split(';');
-            if (partes.Length == 6)
+            var x = linha.Split(';');
+            alugueis.Add(new Aluguel
             {
-                alugueis.Add(new Aluguel
-                {
-                    Cliente = partes[0],
-                    Produto = partes[1],
-                    Dias = int.Parse(partes[2]),
-                    ValorDiaria = double.Parse(partes[3], CultureInfo.InvariantCulture),
-                    Pago = bool.Parse(partes[4]),
-                    Data = DateTime.ParseExact(partes[5], "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)
-                });
-            }
+                Cliente = x[0],
+                Produto = x[1],
+                Dias = int.Parse(x[2]),
+                ValorDiaria = double.Parse(x[3], CultureInfo.InvariantCulture),
+                Pago = bool.Parse(x[4]),
+                Data = DateTime.ParseExact(x[5], "yyyy-MM-dd", CultureInfo.InvariantCulture)
+            });
         }
     }
 
     static void SalvarAlugueis()
     {
-        using (var writer = new StreamWriter(caminhoAlugueis))
+        using var sw = new StreamWriter(caminhoAlugueis);
+        foreach (var a in alugueis)
+            sw.WriteLine($"{a.Cliente};{a.Produto};{a.Dias};{a.ValorDiaria.ToString(CultureInfo.InvariantCulture)};{a.Pago};{a.Data:yyyy-MM-dd}");
+    }
+
+    static void CarregarDividas()
+    {
+        if (!File.Exists(caminhoDividas)) return;
+        foreach (var linha in File.ReadAllLines(caminhoDividas))
         {
-            foreach (var a in alugueis)
+            var x = linha.Split(';');
+            dividas.Add(new DividaEmpresa
             {
-                writer.WriteLine($"{a.Cliente};{a.Produto};{a.Dias};{a.ValorDiaria.ToString(CultureInfo.InvariantCulture)};{a.Pago};{a.Data:yyyy-MM-dd HH:mm:ss}");
-            }
+                Pessoa = x[0],
+                Descricao = x[1],
+                ValorPago = double.Parse(x[3], CultureInfo.InvariantCulture),
+                Data = DateTime.ParseExact(x[4], "yyyy-MM-dd", CultureInfo.InvariantCulture),
+                Pago = bool.Parse(x[5])
+            });
         }
+    }
+
+    static void SalvarDividas()
+    {
+        using var sw = new StreamWriter(caminhoDividas);
+        foreach (var d in dividas)
+            sw.WriteLine($"{d.Pessoa};{d.Descricao};{d.ValorTotal.ToString(CultureInfo.InvariantCulture)};{d.ValorPago.ToString(CultureInfo.InvariantCulture)};{d.Data:yyyy-MM-dd};{d.Pago}");
     }
 }
