@@ -19,6 +19,7 @@ class Aluguel
     public double ValorDiaria { get; set; }
     public bool Pago { get; set; }
     public DateTime Data { get; set; }
+    public bool Devolvido { get; set; }
 
     public double ValorTotal => Dias * ValorDiaria;
 }
@@ -64,12 +65,13 @@ class Program
             Console.WriteLine("2 - Registrar Aluguel");
             Console.WriteLine("3 - Ver Estoque");
             Console.WriteLine("4 - Ver Aluguéis");
-            Console.WriteLine("5 - Adicionar Dívida da Empresa");
-            Console.WriteLine("6 - Ver Dívidas da Empresa");
-            Console.WriteLine("7 - Registrar Pagamento de Dívida");
-            Console.WriteLine("8 - Ver Dívidas (Mobile)");
-            Console.WriteLine("9 - Ver Resumo Financeiro");
-            Console.WriteLine("10 - Salvar e Sair");
+            Console.WriteLine("5 - Registrar Devolução de Equipamento");
+            Console.WriteLine("6 - Adicionar Dívida da Empresa");
+            Console.WriteLine("7 - Ver Dívidas da Empresa");
+            Console.WriteLine("8 - Registrar Pagamento de Dívida");
+            Console.WriteLine("9 - Ver Dívidas (Mobile)");
+            Console.WriteLine("10 - Ver Resumo Financeiro");
+            Console.WriteLine("11 - Salvar e Sair");
             Console.Write("Escolha: ");
             string op = Console.ReadLine();
 
@@ -79,12 +81,13 @@ class Program
                 case "2": RegistrarAluguel(); break;
                 case "3": ListarProdutos(); break;
                 case "4": ListarAlugueis(); break;
-                case "5": AdicionarDivida(); break;
-                case "6": ListarDividas(); break;
-                case "7": RegistrarPagamento(); break;
-                case "8": ListarDividasMobile(); break;
-                case "9": ResumoFinanceiro(); break;
-                case "10":
+                case "5": RegistrarDevolucao(); break;
+                case "6": AdicionarDivida(); break;
+                case "7": ListarDividas(); break;
+                case "8": RegistrarPagamento(); break;
+                case "9": ListarDividasMobile(); break;
+                case "10": ResumoFinanceiro(); break;
+                case "11":
                     SalvarProdutos();
                     SalvarAlugueis();
                     SalvarDividas();
@@ -189,12 +192,57 @@ class Program
                 Dias = dias,
                 ValorDiaria = p.ValorDiaria,
                 Pago = pago,
-                Data = DateTime.Now
+                Data = DateTime.Now,
+                Devolvido = false
             });
         }
 
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Aluguel registrado.");
+        Console.ResetColor();
+    }
+
+    static void RegistrarDevolucao()
+    {
+        Console.WriteLine("=== REGISTRAR DEVOLUÇÃO DE EQUIPAMENTO ===");
+
+        // Listar aluguéis ativos (não devolvidos)
+        var alugueisAtivos = alugueis.Where(a => !a.Devolvido).ToList();
+
+        if (alugueisAtivos.Count == 0)
+        {
+            Console.WriteLine("Não há equipamentos alugados no momento.");
+            return;
+        }
+
+        Console.WriteLine("\nEquipamentos alugados:");
+        for (int i = 0; i < alugueisAtivos.Count; i++)
+        {
+            Console.WriteLine($"{i + 1} - Cliente: {alugueisAtivos[i].Cliente} | Produto: {alugueisAtivos[i].Produto} | Data: {alugueisAtivos[i].Data:dd/MM/yyyy}");
+        }
+
+        Console.Write("\nSelecione o equipamento a devolver (número): ");
+        if (!int.TryParse(Console.ReadLine(), out int selecao) || selecao < 1 || selecao > alugueisAtivos.Count)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Seleção inválida.");
+            Console.ResetColor();
+            return;
+        }
+
+        var aluguel = alugueisAtivos[selecao - 1];
+        aluguel.Devolvido = true;
+
+        // Encontrar o produto correspondente e incrementar a quantidade disponível
+        var produto = produtos.FirstOrDefault(p => p.Nome.Equals(aluguel.Produto, StringComparison.OrdinalIgnoreCase));
+        if (produto != null)
+        {
+            produto.QuantidadeDisponivel++;
+        }
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"\nEquipamento {aluguel.Produto} devolvido por {aluguel.Cliente} em {DateTime.Now:dd/MM/yyyy}");
+        Console.WriteLine($"Quantidade disponível atualizada: {produto?.QuantidadeDisponivel ?? 0}");
         Console.ResetColor();
     }
 
@@ -223,7 +271,7 @@ class Program
 
         foreach (var a in alugueis)
         {
-            Console.WriteLine($"Cliente: {a.Cliente} | Produto: {a.Produto} | Dias: {a.Dias} | Data: {a.Data:dd/MM/yyyy} | Total: {a.ValorTotal.ToString("C", culturaBR)} | {(a.Pago ? "Pago" : "Aberto")}");
+            Console.WriteLine($"Cliente: {a.Cliente} | Produto: {a.Produto} | Dias: {a.Dias} | Data: {a.Data:dd/MM/yyyy} | Total: {a.ValorTotal.ToString("C", culturaBR)} | {(a.Pago ? "Pago" : "Aberto")} | {(a.Devolvido ? "Devolvido" : "Em uso")}");
         }
     }
 
@@ -447,11 +495,12 @@ class Program
         foreach (var linha in File.ReadAllLines(caminhoAlugueis))
         {
             var x = linha.Split(';');
-            if (x.Length < 6) continue;
+            if (x.Length < 7) continue;
             if (!int.TryParse(x[2], out int dias)) continue;
             if (!double.TryParse(x[3], NumberStyles.Any, CultureInfo.InvariantCulture, out double valorDiaria)) continue;
             if (!bool.TryParse(x[4], out bool pago)) continue;
             if (!DateTime.TryParseExact(x[5], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime data)) continue;
+            if (!bool.TryParse(x[6], out bool devolvido)) continue;
 
             alugueis.Add(new Aluguel
             {
@@ -460,7 +509,8 @@ class Program
                 Dias = dias,
                 ValorDiaria = valorDiaria,
                 Pago = pago,
-                Data = data
+                Data = data,
+                Devolvido = devolvido
             });
         }
     }
@@ -469,7 +519,7 @@ class Program
     {
         using var sw = new StreamWriter(caminhoAlugueis);
         foreach (var a in alugueis)
-            sw.WriteLine($"{a.Cliente};{a.Produto};{a.Dias};{a.ValorDiaria.ToString(CultureInfo.InvariantCulture)};{a.Pago};{a.Data:yyyy-MM-dd}");
+            sw.WriteLine($"{a.Cliente};{a.Produto};{a.Dias};{a.ValorDiaria.ToString(CultureInfo.InvariantCulture)};{a.Pago};{a.Data:yyyy-MM-dd};{a.Devolvido}");
     }
 
     static void CarregarDividas()
@@ -503,4 +553,3 @@ class Program
             sw.WriteLine($"{d.Pessoa};{d.Descricao};{d.ValorTotal.ToString(CultureInfo.InvariantCulture)};{d.ValorPago.ToString(CultureInfo.InvariantCulture)};{d.Data:yyyy-MM-dd};{d.Pago}");
     }
 }
-
