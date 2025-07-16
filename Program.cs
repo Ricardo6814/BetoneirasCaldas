@@ -39,12 +39,19 @@ class Program
     static List<Aluguel> alugueis = new List<Aluguel>();
     static List<DividaEmpresa> dividas = new List<DividaEmpresa>();
 
-    static string caminhoProdutos = "produtos.txt";
-    static string caminhoAlugueis = "aluguéis.txt";
-    static string caminhoDividas = "dividas.txt";
+    static string pastaDados = "data";
+    static string caminhoProdutos = Path.Combine(pastaDados, "produtos.txt");
+    static string caminhoAlugueis = Path.Combine(pastaDados, "aluguéis.txt");
+    static string caminhoDividas = Path.Combine(pastaDados, "dividas.txt");
+
+    static CultureInfo culturaBR = new CultureInfo("pt-BR");
 
     static void Main()
     {
+        // Cria pasta caso não exista
+        if (!Directory.Exists(pastaDados))
+            Directory.CreateDirectory(pastaDados);
+
         CarregarProdutos();
         CarregarAlugueis();
         CarregarDividas();
@@ -81,9 +88,13 @@ class Program
                     SalvarProdutos();
                     SalvarAlugueis();
                     SalvarDividas();
-                    Console.WriteLine("Tudo salvo. Até logo!");
+                    Console.WriteLine("\nTudo salvo. Até logo!");
                     return;
-                default: Console.WriteLine("Opção inválida."); break;
+                default:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nOpção inválida.");
+                    Console.ResetColor();
+                    break;
             }
 
             Console.WriteLine("\nPressione ENTER para continuar...");
@@ -97,13 +108,27 @@ class Program
         string nome = Console.ReadLine();
 
         Console.Write("Quantidade disponível: ");
-        int qtd = int.Parse(Console.ReadLine());
+        if (!int.TryParse(Console.ReadLine(), out int qtd) || qtd < 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Quantidade inválida.");
+            Console.ResetColor();
+            return;
+        }
 
         Console.Write("Valor da diária: ");
-        double diaria = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+        if (!double.TryParse(Console.ReadLine(), NumberStyles.Any, CultureInfo.InvariantCulture, out double diaria) || diaria < 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Valor inválido.");
+            Console.ResetColor();
+            return;
+        }
 
         produtos.Add(new Produto { Nome = nome, QuantidadeDisponivel = qtd, ValorDiaria = diaria });
+        Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Produto adicionado!");
+        Console.ResetColor();
     }
 
     static void RegistrarAluguel()
@@ -117,24 +142,41 @@ class Program
         var p = produtos.Find(x => x.Nome.Equals(nome, StringComparison.OrdinalIgnoreCase));
         if (p == null)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Produto não encontrado.");
+            Console.ResetColor();
             return;
         }
 
         Console.Write("Dias de aluguel: ");
-        int dias = int.Parse(Console.ReadLine());
+        if (!int.TryParse(Console.ReadLine(), out int dias) || dias <= 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Número de dias inválido.");
+            Console.ResetColor();
+            return;
+        }
 
         Console.Write("Quantidade a alugar: ");
-        int qtd = int.Parse(Console.ReadLine());
-
-        Console.Write("Pago? (s/n): ");
-        bool pago = Console.ReadLine().ToLower() == "s";
+        if (!int.TryParse(Console.ReadLine(), out int qtd) || qtd <= 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Quantidade inválida.");
+            Console.ResetColor();
+            return;
+        }
 
         if (qtd > p.QuantidadeDisponivel)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Quantidade indisponível.");
+            Console.ResetColor();
             return;
         }
+
+        Console.Write("Pago? (s/n): ");
+        string pagoStr = Console.ReadLine().ToLower();
+        bool pago = pagoStr == "s" || pagoStr == "sim";
 
         p.QuantidadeDisponivel -= qtd;
 
@@ -151,22 +193,37 @@ class Program
             });
         }
 
+        Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Aluguel registrado.");
+        Console.ResetColor();
     }
 
     static void ListarProdutos()
     {
+        if (produtos.Count == 0)
+        {
+            Console.WriteLine("Nenhum produto cadastrado.");
+            return;
+        }
+
         foreach (var p in produtos)
         {
-            Console.WriteLine($"Nome: {p.Nome} | Quantidade: {p.QuantidadeDisponivel} | Diária: R$ {p.ValorDiaria:F2}");
+            double valorTotalEstoque = p.QuantidadeDisponivel * p.ValorDiaria;
+            Console.WriteLine($"Nome: {p.Nome} | Quantidade: {p.QuantidadeDisponivel} | Diária: {p.ValorDiaria.ToString("C", culturaBR)} | Valor total estoque (diária): {valorTotalEstoque.ToString("C", culturaBR)}");
         }
     }
 
     static void ListarAlugueis()
     {
+        if (alugueis.Count == 0)
+        {
+            Console.WriteLine("Nenhum aluguel registrado.");
+            return;
+        }
+
         foreach (var a in alugueis)
         {
-            Console.WriteLine($"Cliente: {a.Cliente} | Produto: {a.Produto} | Dias: {a.Dias} | Data: {a.Data:dd/MM/yyyy} | Total: R$ {a.Dias * a.ValorDiaria:F2} | {(a.Pago ? "Pago" : "Aberto")}");
+            Console.WriteLine($"Cliente: {a.Cliente} | Produto: {a.Produto} | Dias: {a.Dias} | Data: {a.Data:dd/MM/yyyy} | Total: {a.ValorTotal.ToString("C", culturaBR)} | {(a.Pago ? "Pago" : "Aberto")}");
         }
     }
 
@@ -178,33 +235,62 @@ class Program
         Console.Write("Descrição: ");
         string descricao = Console.ReadLine();
 
-        Console.Write("Valor pago: ");
-        double pago = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+        Console.Write("Valor total da dívida: ");
+        if (!double.TryParse(Console.ReadLine(), NumberStyles.Any, CultureInfo.InvariantCulture, out double valorTotal) || valorTotal < 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Valor total inválido.");
+            Console.ResetColor();
+            return;
+        }
 
-        Console.Write("Data (dd/mm/yyyy): ");
-        DateTime data = DateTime.ParseExact(Console.ReadLine(), "dd/MM/yyyy", CultureInfo.InvariantCulture);
+        Console.Write("Valor pago: ");
+        if (!double.TryParse(Console.ReadLine(), NumberStyles.Any, CultureInfo.InvariantCulture, out double pago) || pago < 0 || pago > valorTotal)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Valor pago inválido.");
+            Console.ResetColor();
+            return;
+        }
+
+        Console.Write("Data (dd/MM/yyyy): ");
+        if (!DateTime.TryParseExact(Console.ReadLine(), "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime data))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Data inválida.");
+            Console.ResetColor();
+            return;
+        }
 
         Console.Write("Está pago? (s/n): ");
-        bool quitado = Console.ReadLine().ToLower() == "s";
+        string quitadoStr = Console.ReadLine().ToLower();
+        bool quitado = quitadoStr == "s" || quitadoStr == "sim";
 
         dividas.Add(new DividaEmpresa
         {
             Pessoa = pessoa,
             Descricao = descricao,
+            ValorTotal = valorTotal,
             ValorPago = pago,
             Data = data,
             Pago = quitado
         });
 
+        Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Dívida registrada.");
+        Console.ResetColor();
     }
 
-    // === ITEM 6 atualizado com resumo e TXT ===
     static void ListarDividas()
     {
+        if (dividas.Count == 0)
+        {
+            Console.WriteLine("Nenhuma dívida registrada.");
+            return;
+        }
+
         double total = 0;
         double totalPago = 0;
-        double totalAberto = 0;
 
         var linhas = new List<string>();
 
@@ -214,30 +300,30 @@ class Program
             linhas.Add($"Pessoa: {d.Pessoa}");
             linhas.Add($"Descrição: {d.Descricao}");
             linhas.Add($"Data: {d.Data:dd/MM/yyyy}");
-            linhas.Add($"Valor Total: R$ {d.ValorTotal:F2}");
-            linhas.Add($"Valor Pago:  R$ {d.ValorPago:F2}");
+            linhas.Add($"Valor Total: {d.ValorTotal.ToString("C", culturaBR)}");
+            linhas.Add($"Valor Pago:  {d.ValorPago.ToString("C", culturaBR)}");
             linhas.Add($"Status: {(d.Pago ? "Pago" : "Em aberto")}");
 
             total += d.ValorTotal;
             totalPago += d.ValorPago;
         }
 
-        totalAberto = total - totalPago;
+        double totalAberto = total - totalPago;
 
         linhas.Add("");
         linhas.Add("===== RESUMO DAS DÍVIDAS =====");
-        linhas.Add($"Total de Dívidas:   R$ {total:F2}");
-        linhas.Add($"Total Pago:         R$ {totalPago:F2}");
-        linhas.Add($"Total em Aberto:    R$ {totalAberto:F2}");
+        linhas.Add($"Total de Dívidas:   {total.ToString("C", culturaBR)}");
+        linhas.Add($"Total Pago:         {totalPago.ToString("C", culturaBR)}");
+        linhas.Add($"Total em Aberto:    {totalAberto.ToString("C", culturaBR)}");
 
-        // Mostra no console
         foreach (var linha in linhas)
             Console.WriteLine(linha);
 
-        // Salva no arquivo txt
-        File.WriteAllLines("dividas_empresa.txt", linhas);
+        File.WriteAllLines(Path.Combine(pastaDados, "dividas_empresa.txt"), linhas);
 
-        Console.WriteLine("\nRelatório salvo em dividas_empresa.txt");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("\nRelatório salvo em data/dividas_empresa.txt");
+        Console.ResetColor();
     }
 
     static void RegistrarPagamento()
@@ -248,22 +334,38 @@ class Program
         var divida = dividas.FirstOrDefault(d => d.Pessoa.Equals(pessoa, StringComparison.OrdinalIgnoreCase) && !d.Pago);
         if (divida == null)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Dívida não encontrada ou já quitada.");
+            Console.ResetColor();
             return;
         }
 
         Console.Write("Valor do pagamento: ");
-        double valor = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+        if (!double.TryParse(Console.ReadLine(), NumberStyles.Any, CultureInfo.InvariantCulture, out double valor) || valor <= 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Valor inválido.");
+            Console.ResetColor();
+            return;
+        }
 
         divida.ValorPago += valor;
         if (divida.ValorPago >= divida.ValorTotal)
             divida.Pago = true;
 
+        Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Pagamento registrado.");
+        Console.ResetColor();
     }
 
     static void ListarDividasMobile()
     {
+        if (dividas.Count == 0)
+        {
+            Console.WriteLine("Nenhuma dívida registrada.");
+            return;
+        }
+
         var linhas = new List<string>();
         double totalPagas = 0;
         double totalAberto = 0;
@@ -273,7 +375,7 @@ class Program
             linhas.Add($"Pessoa: {d.Pessoa}");
             linhas.Add($"Data: {d.Data:dd/MM/yyyy}");
             linhas.Add($"Descrição: {d.Descricao}");
-            linhas.Add($"Valor Pago: R$ {d.ValorPago:F2}");
+            linhas.Add($"Valor Pago: {d.ValorPago.ToString("C", culturaBR)}");
             linhas.Add($"Status: {(d.Pago ? "Pago" : "Em aberto")}");
             linhas.Add("----------------------------------");
 
@@ -284,11 +386,11 @@ class Program
         double totalGeral = totalPagas + totalAberto;
 
         linhas.Add("== RESUMO ==");
-        linhas.Add($"Total Pagas:     R$ {totalPagas:F2}");
-        linhas.Add($"Total Em Aberto: R$ {totalAberto:F2}");
-        linhas.Add($"TOTAL GERAL:     R$ {totalGeral:F2}");
+        linhas.Add($"Total Pagas:     {totalPagas.ToString("C", culturaBR)}");
+        linhas.Add($"Total Em Aberto: {totalAberto.ToString("C", culturaBR)}");
+        linhas.Add($"TOTAL GERAL:     {totalGeral.ToString("C", culturaBR)}");
 
-        File.WriteAllLines("dividas_mobile.txt", linhas);
+        File.WriteAllLines(Path.Combine(pastaDados, "dividas_mobile.txt"), linhas);
         foreach (var l in linhas) Console.WriteLine(l);
     }
 
@@ -305,16 +407,16 @@ class Program
         {
             $"--- RESUMO FINANCEIRO ---",
             $"Data: {DateTime.Now:dd/MM/yyyy HH:mm}",
-            $"Total Aluguéis:     R$ {totalAlugueis:F2}",
-            $"Recebidos:          R$ {recebidos:F2}",
-            $"Em Aberto:          R$ {emAberto:F2}",
-            $"Total Dívidas:      R$ {totalDividas:F2}",
-            $"Dívidas Pagas:      R$ {dividasPagas:F2}",
-            $"Dívidas em Aberto:  R$ {totalDividas - dividasPagas:F2}",
-            $"Saldo Final:        R$ {recebidos - dividasPagas:F2}"
+            $"Total Aluguéis:     {totalAlugueis.ToString("C", culturaBR)}",
+            $"Recebidos:          {recebidos.ToString("C", culturaBR)}",
+            $"Em Aberto:          {emAberto.ToString("C", culturaBR)}",
+            $"Total Dívidas:      {totalDividas.ToString("C", culturaBR)}",
+            $"Dívidas Pagas:      {dividasPagas.ToString("C", culturaBR)}",
+            $"Dívidas em Aberto:  {(totalDividas - dividasPagas).ToString("C", culturaBR)}",
+            $"Saldo Final:        {(recebidos - dividasPagas).ToString("C", culturaBR)}"
         };
 
-        File.WriteAllLines("resumo_financeiro.txt", resumo);
+        File.WriteAllLines(Path.Combine(pastaDados, "resumo_financeiro.txt"), resumo);
         foreach (var l in resumo) Console.WriteLine(l);
     }
 
@@ -324,7 +426,11 @@ class Program
         foreach (var linha in File.ReadAllLines(caminhoProdutos))
         {
             var x = linha.Split(';');
-            produtos.Add(new Produto { Nome = x[0], QuantidadeDisponivel = int.Parse(x[1]), ValorDiaria = double.Parse(x[2], CultureInfo.InvariantCulture) });
+            if (x.Length < 3) continue;
+            if (!int.TryParse(x[1], out int qtd)) continue;
+            if (!double.TryParse(x[2], NumberStyles.Any, CultureInfo.InvariantCulture, out double diaria)) continue;
+
+            produtos.Add(new Produto { Nome = x[0], QuantidadeDisponivel = qtd, ValorDiaria = diaria });
         }
     }
 
@@ -341,14 +447,20 @@ class Program
         foreach (var linha in File.ReadAllLines(caminhoAlugueis))
         {
             var x = linha.Split(';');
+            if (x.Length < 6) continue;
+            if (!int.TryParse(x[2], out int dias)) continue;
+            if (!double.TryParse(x[3], NumberStyles.Any, CultureInfo.InvariantCulture, out double valorDiaria)) continue;
+            if (!bool.TryParse(x[4], out bool pago)) continue;
+            if (!DateTime.TryParseExact(x[5], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime data)) continue;
+
             alugueis.Add(new Aluguel
             {
                 Cliente = x[0],
                 Produto = x[1],
-                Dias = int.Parse(x[2]),
-                ValorDiaria = double.Parse(x[3], CultureInfo.InvariantCulture),
-                Pago = bool.Parse(x[4]),
-                Data = DateTime.ParseExact(x[5], "yyyy-MM-dd", CultureInfo.InvariantCulture)
+                Dias = dias,
+                ValorDiaria = valorDiaria,
+                Pago = pago,
+                Data = data
             });
         }
     }
@@ -366,13 +478,20 @@ class Program
         foreach (var linha in File.ReadAllLines(caminhoDividas))
         {
             var x = linha.Split(';');
+            if (x.Length < 6) continue;
+            if (!double.TryParse(x[2], NumberStyles.Any, CultureInfo.InvariantCulture, out double valorTotal)) continue;
+            if (!double.TryParse(x[3], NumberStyles.Any, CultureInfo.InvariantCulture, out double valorPago)) continue;
+            if (!DateTime.TryParseExact(x[4], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime data)) continue;
+            if (!bool.TryParse(x[5], out bool pago)) continue;
+
             dividas.Add(new DividaEmpresa
             {
                 Pessoa = x[0],
                 Descricao = x[1],
-                ValorPago = double.Parse(x[3], CultureInfo.InvariantCulture),
-                Data = DateTime.ParseExact(x[4], "yyyy-MM-dd", CultureInfo.InvariantCulture),
-                Pago = bool.Parse(x[5])
+                ValorTotal = valorTotal,
+                ValorPago = valorPago,
+                Data = data,
+                Pago = pago
             });
         }
     }
@@ -384,3 +503,4 @@ class Program
             sw.WriteLine($"{d.Pessoa};{d.Descricao};{d.ValorTotal.ToString(CultureInfo.InvariantCulture)};{d.ValorPago.ToString(CultureInfo.InvariantCulture)};{d.Data:yyyy-MM-dd};{d.Pago}");
     }
 }
+
