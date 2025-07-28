@@ -49,13 +49,10 @@ class Program
 
     static void Main()
     {
-        // Cria pasta caso não exista
         if (!Directory.Exists(pastaDados))
             Directory.CreateDirectory(pastaDados);
 
-        CarregarProdutos();
-        CarregarAlugueis();
-        CarregarDividas();
+        CarregarDados();
 
         while (true)
         {
@@ -88,9 +85,7 @@ class Program
                 case "9": ListarDividasMobile(); break;
                 case "10": ResumoFinanceiro(); break;
                 case "11":
-                    SalvarProdutos();
-                    SalvarAlugueis();
-                    SalvarDividas();
+                    SalvarTudo();
                     Console.WriteLine("\nTudo salvo. Até logo!");
                     return;
                 default:
@@ -103,6 +98,20 @@ class Program
             Console.WriteLine("\nPressione ENTER para continuar...");
             Console.ReadLine();
         }
+    }
+
+    static void CarregarDados()
+    {
+        CarregarProdutos();
+        CarregarAlugueis();
+        CarregarDividas();
+    }
+
+    static void SalvarTudo()
+    {
+        SalvarProdutos();
+        SalvarAlugueis();
+        SalvarDividas();
     }
 
     static void AdicionarProduto()
@@ -129,8 +138,9 @@ class Program
         }
 
         produtos.Add(new Produto { Nome = nome, QuantidadeDisponivel = qtd, ValorDiaria = diaria });
+        SalvarTudo();
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Produto adicionado!");
+        Console.WriteLine("Produto adicionado e salvo!");
         Console.ResetColor();
     }
 
@@ -197,8 +207,9 @@ class Program
             });
         }
 
+        SalvarTudo();
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Aluguel registrado.");
+        Console.WriteLine("Aluguel registrado e salvo!");
         Console.ResetColor();
     }
 
@@ -206,7 +217,6 @@ class Program
     {
         Console.WriteLine("=== REGISTRAR DEVOLUÇÃO DE EQUIPAMENTO ===");
 
-        // Listar aluguéis ativos (não devolvidos)
         var alugueisAtivos = alugueis.Where(a => !a.Devolvido).ToList();
 
         if (alugueisAtivos.Count == 0)
@@ -233,13 +243,13 @@ class Program
         var aluguel = alugueisAtivos[selecao - 1];
         aluguel.Devolvido = true;
 
-        // Encontrar o produto correspondente e incrementar a quantidade disponível
         var produto = produtos.FirstOrDefault(p => p.Nome.Equals(aluguel.Produto, StringComparison.OrdinalIgnoreCase));
         if (produto != null)
         {
             produto.QuantidadeDisponivel++;
         }
 
+        SalvarTudo();
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine($"\nEquipamento {aluguel.Produto} devolvido por {aluguel.Cliente} em {DateTime.Now:dd/MM/yyyy}");
         Console.WriteLine($"Quantidade disponível atualizada: {produto?.QuantidadeDisponivel ?? 0}");
@@ -324,8 +334,9 @@ class Program
             Pago = quitado
         });
 
+        SalvarTudo();
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Dívida registrada.");
+        Console.WriteLine("Dívida registrada e salva!");
         Console.ResetColor();
     }
 
@@ -401,8 +412,9 @@ class Program
         if (divida.ValorPago >= divida.ValorTotal)
             divida.Pago = true;
 
+        SalvarTudo();
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Pagamento registrado.");
+        Console.WriteLine("Pagamento registrado e salvo!");
         Console.ResetColor();
     }
 
