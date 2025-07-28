@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetoneiraPlus - Sistema de Aluguel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .sidebar {
+            background-color: var(--primary-color);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding-top: 20px;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 5px;
+            border-radius: 5px;
+            padding: 10px 15px;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-danger {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card.blue {
+            background-color: var(--secondary-color);
+        }
+        
+        .stat-card.green {
+            background-color: #27ae60;
+        }
+        
+        .stat-card.red {
+            background-color: var(--accent-color);
+        }
+        
+        .stat-card .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .badge-paid {
+            background-color: #27ae60;
+        }
+        
+        .badge-unpaid {
+            background-color: #e74c3c;
+        }
+        
+        .badge-returned {
+            background-color: #27ae60;
+        }
+        
+        .badge-rented {
+            background-color: #f39c12;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 0 15px;
+        }
+        
+        .logo img {
+            max-width: 80%;
+            margin-bottom: 10px;
+        }
+        
+        .logo h4 {
+            color: white;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar">
+                <div class="logo">
+                    <h4><i class="bi bi-building"></i> BetoneiraPlus</h4>
+                    <p class="text-muted">Sistema de Aluguel</p>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="dashboard-link">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="products-link">
+                            <i class="bi bi-tools"></i> Produtos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="rentals-link">
+                            <i class="bi bi-cart-check"></i> Aluguéis
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="returns-link">
+                            <i class="bi bi-arrow-return-left"></i> Devoluções
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="debts-link">
+                            <i class="bi bi-credit-card"></i> Dívidas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="reports-link">
+                            <i class="bi bi-graph-up"></i> Relatórios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section">
+                    <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="stat-card blue">
+                                <i class="bi bi-tools" style="font-size: 2rem;"></i>
+                                <h4>Produtos</h4>
+                                <div class="stat-value" id="total-products">0</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card green">
+                                <i class="bi bi-cash-coin" style="font-size: 2rem;"></i>
+                                <h4>Receita Total</h4>
+                                <div class="stat-value" id="total-revenue">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card red">
+                                <i class="bi bi-credit-card" style="font-size: 2rem;"></i>
+                                <h4>Dívidas</h4>
+                                <div class="stat-value" id="total-debts">R$ 0,00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="bi bi-cart-check"></i> Aluguéis Recentes</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="recent-rentals">
+                                            <thead>
+                                                <tr>
+                                                    <th>Cliente</th>
+                                                    <th>Produto</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Dinamic content -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="bi bi-credit-card"></i> Dívidas Recentes</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="recent-debts">
+                                            <thead>
+                                                <tr>
+                                                    <th>Pessoa</th>
+                                                    <th>Valor</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Dinamic content -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Section -->
+                <div id="products-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2><i class="bi bi-tools"></i> Gerenciamento de Produtos</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                            <i class="bi bi-plus-circle"></i> Adicionar Produto
+                        </button>
+                    </div>
+                    <hr>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Lista de Produtos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="products-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Quantidade</th>
+                                            <th>Valor Diária</th>
+                                            <th>Valor Total Estoque</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dinamic content -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rentals Section -->
+                <div id="rentals-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2><i class="bi bi-cart-check"></i> Gerenciamento de Aluguéis</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRentalModal">
+                            <i class="bi bi-plus-circle"></i> Novo Aluguel
+                        </button>
+                    </div>
+                    <hr>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Histórico de Aluguéis</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="rentals-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Produto</th>
+                                            <th>Data</th>
+                                            <th>Dias</th>
+                                            <th>Valor Total</th>
+                                            <th>Pagamento</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dinamic content -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Returns Section -->
+                <div id="returns-section" style="display: none;">
+                    <h2><i class="bi bi-arrow-return-left"></i> Registrar Devolução</h2>
+                    <hr>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Aluguéis Ativos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="active-rentals">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Produto</th>
+                                            <th>Data Aluguel</th>
+                                            <th>Dias</th>
+                                            <th>Valor Total</th>
+                                            <th>Pagamento</th>
+                                            <th>Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dinamic content -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Debts Section -->
+                <div id="debts-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2><i class="bi bi-credit-card"></i> Gerenciamento de Dívidas</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDebtModal">
+                            <i class="bi bi-plus-circle"></i> Nova Dívida
+                        </button>
+                    </div>
+                    <hr>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Lista de Dívidas</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="debts-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Pessoa</th>
+                                            <th>Descrição</th>
+                                            <th>Data</th>
+                                            <th>Valor Total</th>
+                                            <th>Valor Pago</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dinamic content -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Section -->
+                <div id="reports-section" style="display: none;">
+                    <h2><i class="bi bi-graph-up"></i> Relatórios Financeiros</h2>
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Resumo de Aluguéis</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="rentalsChart" height="200"></canvas>
+                                    <div class="mt-3">
+                                        <p><strong>Total de Aluguéis:</strong> <span id="total-rentals">R$ 0,00</span></p>
+                                        <p><strong>Recebidos:</strong> <span id="paid-rentals">R$ 0,00</span></p>
+                                        <p><strong>Em Aberto:</strong> <span id="unpaid-rentals">R$ 0,00</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Resumo de Dívidas</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="debtsChart" height="200"></canvas>
+                                    <div class="mt-3">
+                                        <p><strong>Total de Dívidas:</strong> <span id="total-debts-report">R$ 0,00</span></p>
+                                        <p><strong>Pagas:</strong> <span id="paid-debts">R$ 0,00</span></p>
+                                        <p><strong>Em Aberto:</strong> <span id="unpaid-debts">R$ 0,00</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Saldo Financeiro</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-success">
+                                <h4><i class="bi bi-cash-stack"></i> Saldo Final: <span id="final-balance">R$ 0,00</span></h4>
+                            </div>
+                            <button class="btn btn-primary" id="generate-report">
+                                <i class="bi bi-file-earmark-text"></i> Gerar Relatório Completo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel"><i class="bi bi-plus-circle"></i> Adicionar Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="product-form">
+                        <div class="mb-3">
+                            <label for="product-name" class="form-label">Nome do Produto</label>
+                            <input type="text" class="form-control" id="product-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="product-quantity" class="form-label">Quantidade Disponível</label>
+                            <input type="number" class="form-control" id="product-quantity" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="product-daily-rate" class="form-label">Valor da Diária (R$)</label>
+                            <input type="number" step="0.01" class="form-control" id="product-daily-rate" min="0" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="save-product">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Rental Modal -->
+    <div class="modal fade" id="addRentalModal" tabindex="-1" aria-labelledby="addRentalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addRentalModalLabel"><i class="bi bi-cart-plus"></i> Novo Aluguel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="rental-form">
+                        <div class="mb-3">
+                            <label for="rental-client" class="form-label">Cliente</label>
+                            <input type="text" class="form-control" id="rental-client" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="rental-product" class="form-label">Produto</label>
+                            <select class="form-select" id="rental-product" required>
+                                <option value="">Selecione um produto</option>
+                                <!-- Dinamic content -->
+                            </select>
+                            <div class="form-text" id="product-info">Disponível: 0 | Diária: R$ 0,00</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="rental-days" class="form-label">Dias de Aluguel</label>
+                            <input type="number" class="form-control" id="rental-days" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="rental-quantity" class="form-label">Quantidade</label>
+                            <input type="number" class="form-control" id="rental-quantity" min="1" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rental-paid">
+                            <label class="form-check-label" for="rental-paid">Pagamento realizado</label>
+                        </div>
+                        <div class="alert alert-info">
+                            <strong>Valor Total:</strong> <span id="rental-total">R$ 0,00</span>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="save-rental">Registrar Aluguel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Debt Modal -->
+    <div class="modal fade" id="addDebtModal" tabindex="-1" aria-labelledby="addDebtModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addDebtModalLabel"><i class="bi bi-credit-card"></i> Nova Dívida</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="debt-form">
+                        <div class="mb-3">
+                            <label for="debt-person" class="form-label">Pessoa</label>
+                            <input type="text" class="form-control" id="debt-person" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="debt-description" class="form-label">Descrição</label>
+                            <input type="text" class="form-control" id="debt-description" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="debt-total" class="form-label">Valor Total (R$)</label>
+                            <input type="number" step="0.01" class="form-control" id="debt-total" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="debt-paid" class="form-label">Valor Pago (R$)</label>
+                            <input type="number" step="0.01" class="form-control" id="debt-paid" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="debt-date" class="form-label">Data</label>
+                            <input type="date" class="form-control" id="debt-date" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="debt-is-paid">
+                            <label class="form-check-label" for="debt-is-paid">Dívida quitada</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="save-debt">Salvar Dívida</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel"><i class="bi bi-cash"></i> Registrar Pagamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="payment-form">
+                        <input type="hidden" id="payment-debt-id">
+                        <div class="mb-3">
+                            <label for="payment-person" class="form-label">Pessoa</label>
+                            <input type="text" class="form-control" id="payment-person" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payment-description" class="form-label">Descrição</label>
+                            <input type="text" class="form-control" id="payment-description" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payment-total" class="form-label">Valor Total (R$)</label>
+                            <input type="text" class="form-control" id="payment-total" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payment-already-paid" class="form-label">Valor Já Pago (R$)</label>
+                            <input type="text" class="form-control" id="payment-already-paid" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payment-amount" class="form-label">Valor do Pagamento (R$)</label>
+                            <input type="number" step="0.01" class="form-control" id="payment-amount" min="0" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="save-payment">Registrar Pagamento</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Return Modal -->
+    <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="returnModalLabel"><i class="bi bi-arrow-return-left"></i> Registrar Devolução</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="return-form">
+                        <input type="hidden" id="return-rental-id">
+                        <div class="mb-3">
+                            <label for="return-client" class="form-label">Cliente</label>
+                            <input type="text" class="form-control" id="return-client" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="return-product" class="form-label">Produto</label>
+                            <input type="text" class="form-control" id="return-product" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="return-date" class="form-label">Data do Aluguel</label>
+                            <input type="text" class="form-control" id="return-date" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="return-days" class="form-label">Dias Alugados</label>
+                            <input type="text" class="form-control" id="return-days" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="return-total" class="form-label">Valor Total</label>
+                            <input type="text" class="form-control" id="return-total" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="return-payment" class="form-label">Status do Pagamento</label>
+                            <input type="text" class="form-control" id="return-payment" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirm-return">Confirmar Devolução</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Mock data - in a real app, this would come from API calls
+        let products = [];
+        let rentals = [];
+        let debts = [];
+        
+        // DOM elements
+        const sections = {
+            dashboard: document.getElementById('dashboard-section'),
+            products: document.getElementById('products-section'),
+            rentals: document.getElementById('rentals-section'),
+            returns: document.getElementById('returns-section'),
+            debts: document.getElementById('debts-section'),
+            reports: document.getElementById('reports-section')
+        };
+        
+        const navLinks = {
+            dashboard: document.getElementById('dashboard-link'),
+            products: document.getElementById('products-link'),
+            rentals: document.getElementById('rentals-link'),
+            returns: document.getElementById('returns-link'),
+            debts: document.getElementById('debts-link'),
+            reports: document.getElementById('reports-link')
+        };
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load mock data
+            loadMockData();
+            
+            // Set up navigation
+            setupNavigation();
+            
+            // Set up modals
+            setupModals();
+            
+            // Display dashboard by default
+            showSection('dashboard');
+            updateDashboard();
+        });
+        
+        function loadMockData() {
+            // Mock products
+            products = [
+                { Nome: "Betoneira 400L", QuantidadeDisponivel: 5, ValorDiaria: 150.00 },
+                { Nome: "Betoneira 500L", QuantidadeDisponivel: 3, ValorDiaria: 180.00 },
+                { Nome: "Vibrador de Concreto", QuantidadeDisponivel: 8, ValorDiaria: 80.00 }
+            ];
+            
+            // Mock rentals
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const lastWeek = new Date(today);
+            lastWeek.setDate(lastWeek.getDate() - 7);
+            
+            rentals = [
+                { 
+                    Cliente: "Construtora ABC", 
+                    Produto: "Betoneira 400L", 
+                    Dias: 5, 
+                    ValorDiaria: 150.00, 
+                    Pago: true, 
+                    Data: lastWeek, 
+                    Devolvido: false 
+                },
+                { 
+                    Cliente: "Engenharia XYZ", 
+                    Produto: "Betoneira 500L", 
+                    Dias: 3, 
+                    ValorDiaria: 180.00, 
+                    Pago: false, 
+                    Data: yesterday, 
+                    Devolvido: false 
+                },
+                { 
+                    Cliente: "Pedro Silva", 
+                    Produto: "Vibrador de Concreto", 
+                    Dias: 2, 
+                    ValorDiaria: 80.00, 
+                    Pago: true, 
+                    Data: today, 
+                    Devolvido: true 
+                }
+            ];
+            
+            // Mock debts
+            debts = [
+                { 
+                    Pessoa: "Fornecedor de Cimento", 
+                    Descricao: "Compra de cimento", 
+                    ValorTotal: 2500.00, 
+                    ValorPago: 1500.00, 
+                    Data: lastWeek, 
+                    Pago: false 
+                },
+                { 
+                    Pessoa: "Energética", 
+                    Descricao: "Conta de luz", 
+                    ValorTotal: 850.00, 
+                    ValorPago: 850.00, 
+                    Data: yesterday, 
+                    Pago: true 
+                }
+            ];
+        }
+        
+        function setupNavigation() {
+            // Add click event listeners to all nav links
+            for (const [sectionName, link] of Object.entries(navLinks)) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showSection(sectionName);
+                });
+            }
+        }
+        
+        function showSection(sectionName) {
+            // Hide all sections
+            for (const section of Object.values(sections)) {
+                section.style.display = 'none';
+            }
+            
+            // Remove active class from all nav links
+            for (const link of Object.values(navLinks)) {
+                link.classList.remove('active');
+            }
+            
+            // Show the selected section and mark its nav link as active
+            sections[sectionName].style.display = 'block';
+            navLinks[sectionName].classList.add('active');
+            
+            // Update the section content if needed
+            switch(sectionName) {
+                case 'dashboard':
+                    updateDashboard();
+                    break;
+                case 'products':
+                    updateProductsTable();
+                    break;
+                case 'rentals':
+                    updateRentalsTable();
+                    break;
+                case 'returns':
+                    updateActiveRentalsTable();
+                    break;
+                case 'debts':
+                    updateDebtsTable();
+                    break;
+                case 'reports':
+                    updateReports();
+                    break;
+            }
+        }
+        
+        function setupModals() {
+            // Product modal
+            document.getElementById('save-product').addEventListener('click', function() {
+                const name = document.getElementById('product-name').value;
+                const quantity = parseInt(document.getElementById('product-quantity').value);
+                const dailyRate = parseFloat(document.getElementById('product-daily-rate').value);
+                
+                if (!name || isNaN(quantity) || isNaN(dailyRate)) {
+                    alert('Preencha todos os campos corretamente!');
+                    return;
+                }
+                
+                // Add new product
+                products.push({
+                    Nome: name,
+                    QuantidadeDisponivel: quantity,
+                    ValorDiaria: dailyRate
+                });
+                
+                // Close modal and reset form
+                bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+                document.getElementById('product-form').reset();
+                
+                // Update products table
+                updateProductsTable();
+                updateDashboard();
+                
+                alert('Produto adicionado com sucesso!');
+            });
+            
+            // Rental modal
+            document.getElementById('rental-product').addEventListener('change', function() {
+                const productName = this.value;
+                const product = products.find(p => p.Nome === productName);
+                
+                if (product) {
+                    document.getElementById('product-info').textContent = 
+                        `Disponível: ${product.QuantidadeDisponivel} | Diária: R$ ${product.ValorDiaria.toFixed(2)}`;
+                } else {
+                    document.getElementById('product-info').textContent = 'Disponível: 0 | Diária: R$ 0,00';
+                }
+                
+                updateRentalTotal();
+            });
+            
+            document.getElementById('rental-days').addEventListener('input', updateRentalTotal);
+            document.getElementById('rental-quantity').addEventListener('input', updateRentalTotal);
+            
+            document.getElementById('save-rental').addEventListener('click', function() {
+                const client = document.getElementById('rental-client').value;
+                const productName = document.getElementById('rental-product').value;
+                const days = parseInt(document.getElementById('rental-days').value);
+                const quantity = parseInt(document.getElementById('rental-quantity').value);
+                const isPaid = document.getElementById('rental-paid').checked;
+                
+                if (!client || !productName || isNaN(days) || isNaN(quantity)) {
+                    alert('Preencha todos os campos corretamente!');
+                    return;
+                }
+                
+                const product = products.find(p => p.Nome === productName);
+                if (!product) {
+                    alert('Produto não encontrado!');
+                    return;
+                }
+                
+                if (quantity > product.QuantidadeDisponivel) {
+                    alert('Quantidade indisponível!');
+                    return;
+                }
+                
+                // Update product quantity
+                product.QuantidadeDisponivel -= quantity;
+                
+                // Add rental(s)
+                for (let i = 0; i < quantity; i++) {
+                    rentals.push({
+                        Cliente: client,
+                        Produto: productName,
+                        Dias: days,
+                        ValorDiaria: product.ValorDiaria,
+                        Pago: isPaid,
+                        Data: new Date(),
+                        Devolvido: false
+                    });
+                }
+                
+                // Close modal and reset form
+                bootstrap.Modal.getInstance(document.getElementById('addRentalModal')).hide();
+                document.getElementById('rental-form').reset();
+                
+                // Update tables and dashboard
+                updateProductsTable();
+                updateRentalsTable();
+                updateActiveRentalsTable();
+                updateDashboard();
+                
+                alert('Aluguel registrado com sucesso!');
+            });
+            
+            // Debt modal
+            document.getElementById('save-debt').addEventListener('click', function() {
+                const person = document.getElementById('debt-person').value;
+                const description = document.getElementById('debt-description').value;
+                const total = parseFloat(document.getElementById('debt-total').value);
+                const paid = parseFloat(document.getElementById('debt-paid').value);
+                const date = document.getElementById('debt-date').value;
+                const isPaid = document.getElementById('debt-is-paid').checked;
+                
+                if (!person || !description || isNaN(total) || isNaN(paid) || !date) {
+                    alert('Preencha todos os campos corretamente!');
+                    return;
+                }
+                
+                if (paid > total) {
+                    alert('O valor pago não pode ser maior que o valor total!');
+                    return;
+                }
+                
+                // Add new debt
+                debts.push({
+                    Pessoa: person,
+                    Descricao: description,
+                    ValorTotal: total,
+                    ValorPago: paid,
+                    Data: new Date(date),
+                    Pago: isPaid
+                });
+                
+                // Close modal and reset form
+                bootstrap.Modal.getInstance(document.getElementById('addDebtModal')).hide();
+                document.getElementById('debt-form').reset();
+                
+                // Update debts table and dashboard
+                updateDebtsTable();
+                updateDashboard();
+                
+                alert('Dívida registrada com sucesso!');
+            });
+            
+            // Payment modal
+            document.getElementById('save-payment').addEventListener('click', function() {
+                const debtId = parseInt(document.getElementById('payment-debt-id').value);
+                const amount = parseFloat(document.getElementById('payment-amount').value);
+                
+                if (isNaN(amount) || amount <= 0) {
+                    alert('Informe um valor válido para o pagamento!');
+                    return;
+                }
+                
+                const debt = debts[debtId];
+                if (!debt) {
+                    alert('Dívida não encontrada!');
+                    return;
+                }
+                
+                // Update debt
+                debt.ValorPago += amount;
+                if (debt.ValorPago >= debt.ValorTotal) {
+                    debt.Pago = true;
+                }
+                
+                // Close modal and reset form
+                bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+                document.getElementById('payment-form').reset();
+                
+                // Update debts table and dashboard
+                updateDebtsTable();
+                updateDashboard();
+                
+                alert('Pagamento registrado com sucesso!');
+            });
+            
+            // Return modal
+            document.getElementById('confirm-return').addEventListener('click', function() {
+                const rentalId = parseInt(document.getElementById('return-rental-id').value);
+                
+                const rental = rentals[rentalId];
+                if (!rental) {
+                    alert('Aluguel não encontrado!');
+                    return;
+                }
+                
+                // Find the product and update its quantity
+                const product = products.find(p => p.Nome === rental.Produto);
+                if (product) {
+                    product.QuantidadeDisponivel++;
+                }
+                
+                // Update rental
+                rental.Devolvido = true;
+                
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
+                
+                // Update tables and dashboard
+                updateProductsTable();
+                updateRentalsTable();
+                updateActiveRentalsTable();
+                updateDashboard();
+                
+                alert('Devolução registrada com sucesso!');
+            });
+            
+            // Generate report button
+            document.getElementById('generate-report').addEventListener('click', function() {
+                // In a real app, this would generate a PDF or download a file
+                alert('Relatório gerado com sucesso! (Esta é uma simulação)');
+            });
+        }
+        
+        function updateRentalTotal() {
+            const productName = document.getElementById('rental-product').value;
+            const days = parseInt(document.getElementById('rental-days').value) || 0;
+            
+            const product = products.find(p => p.Nome === productName);
+            if (!product) {
+                document.getElementById('rental-total').textContent = 'R$ 0,00';
+                return;
+            }
+            
+            const total = days * product.ValorDiaria;
+            document.getElementById('rental-total').textContent = `R$ ${total.toFixed(2)}`;
+        }
+        
+        function updateDashboard() {
+            // Update stats
+            document.getElementById('total-products').textContent = products.length;
+            
+            const totalRevenue = rentals.reduce((sum, r) => sum + r.ValorDiaria * r.Dias, 0);
+            document.getElementById('total-revenue').textContent = `R$ ${totalRevenue.toFixed(2)}`;
+            
+            const totalDebts = debts.reduce((sum, d) => sum + d.ValorTotal, 0);
+            document.getElementById('total-debts').textContent = `R$ ${totalDebts.toFixed(2)}`;
+            
+            // Update recent rentals
+            const recentRentalsTable = document.getElementById('recent-rentals').querySelector('tbody');
+            recentRentalsTable.innerHTML = '';
+            
+            const sortedRentals = [...rentals].sort((a, b) => b.Data - a.Data).slice(0, 5);
+            for (const rental of sortedRentals) {
+                const row = document.createElement('tr');
+                
+                const status = rental.Pago ? 
+                    '<span class="badge bg-success">Pago</span>' : 
+                    '<span class="badge bg-warning">Aberto</span>';
+                
+                row.innerHTML = `
+                    <td>${rental.Cliente}</td>
+                    <td>${rental.Produto}</td>
+                    <td>${status}</td>
+                `;
+                
+                recentRentalsTable.appendChild(row);
+            }
+            
+            // Update recent debts
+            const recentDebtsTable = document.getElementById('recent-debts').querySelector('tbody');
+            recentDebtsTable.innerHTML = '';
+            
+            const sortedDebts = [...debts].sort((a, b) => b.Data - a.Data).slice(0, 5);
+            for (const debt of sortedDebts) {
+                const row = document.createElement('tr');
+                
+                const status = debt.Pago ? 
+                    '<span class="badge bg-success">Pago</span>' : 
+                    '<span class="badge bg-danger">Aberto</span>';
+                
+                row.innerHTML = `
+                    <td>${debt.Pessoa}</td>
+                    <td>R$ ${debt.ValorTotal.toFixed(2)}</td>
+                    <td>${status}</td>
+                `;
+                
+                recentDebtsTable.appendChild(row);
+            }
+        }
+        
+        function updateProductsTable() {
+            const table = document.getElementById('products-table').querySelector('tbody');
+            table.innerHTML = '';
+            
+            for (let i = 0; i < products.length; i++) {
+                const product = products[i];
+                const totalValue = product.QuantidadeDisponivel * product.ValorDiaria;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.Nome}</td>
+                    <td>${product.QuantidadeDisponivel}</td>
+                    <td>R$ ${product.ValorDiaria.toFixed(2)}</td>
+                    <td>R$ ${totalValue.toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary edit-product" data-id="${i}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger delete-product" data-id="${i}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                table.appendChild(row);
+            }
+            
+            // Add event listeners to edit/delete buttons
+            document.querySelectorAll('.edit-product').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    editProduct(id);
+                });
+            });
+            
+            document.querySelectorAll('.delete-product').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    deleteProduct(id);
+                });
+            });
+            
+            // Update product dropdown in rental modal
+            const productDropdown = document.getElementById('rental-product');
+            productDropdown.innerHTML = '<option value="">Selecione um produto</option>';
+            
+            for (const product of products) {
+                const option = document.createElement('option');
+                option.value = product.Nome;
+                option.textContent = product.Nome;
+                productDropdown.appendChild(option);
+            }
+        }
+        
+        function editProduct(id) {
+            const product = products[id];
+            if (!product) return;
+            
+            // In a real app, this would open a modal for editing
+            const newName = prompt('Novo nome do produto:', product.Nome);
+            if (newName === null) return;
+            
+            const newQty = prompt('Nova quantidade disponível:', product.QuantidadeDisponivel);
+            if (newQty === null) return;
+            
+            const newRate = prompt('Novo valor da diária:', product.ValorDiaria);
+            if (newRate === null) return;
+            
+            product.Nome = newName;
+            product.QuantidadeDisponivel = parseInt(newQty) || 0;
+            product.ValorDiaria = parseFloat(newRate) || 0;
+            
+            updateProductsTable();
+            updateDashboard();
+            alert('Produto atualizado com sucesso!');
+        }
+        
+        function deleteProduct(id) {
+            if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+            
+            products.splice(id, 1);
+            updateProductsTable();
+            updateDashboard();
+            alert('Produto excluído com sucesso!');
+        }
+        
+        function updateRentalsTable() {
+            const table = document.getElementById('rentals-table').querySelector('tbody');
+            table.innerHTML = '';
+            
+            for (let i = 0; i < rentals.length; i++) {
+                const rental = rentals[i];
+                
+                const paymentStatus = rental.Pago ? 
+                    '<span class="badge badge-paid">Pago</span>' : 
+                    '<span class="badge badge-unpaid">Aberto</span>';
+                
+                const rentalStatus = rental.Devolvido ? 
+                    '<span class="badge badge-returned">Devolvido</span>' : 
+                    '<span class="badge badge-rented">Em uso</span>';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${rental.Cliente}</td>
+                    <td>${rental.Produto}</td>
+                    <td>${formatDate(rental.Data)}</td>
+                    <td>${rental.Dias}</td>
+                    <td>R$ ${(rental.Dias * rental.ValorDiaria).toFixed(2)}</td>
+                    <td>${paymentStatus}</td>
+                    <td>${rentalStatus}</td>
+                    <td>
+                        ${!rental.Devolvido ? `<button class="btn btn-sm btn-outline-success register-return" data-id="${i}">
+                            <i class="bi bi-arrow-return-left"></i>
+                        </button>` : ''}
+                    </td>
+                `;
+                
+                table.appendChild(row);
+            }
+            
+            // Add event listeners to return buttons
+            document.querySelectorAll('.register-return').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    showReturnModal(id);
+                });
+            });
+        }
+        
+        function updateActiveRentalsTable() {
+            const table = document.getElementById('active-rentals').querySelector('tbody');
+            table.innerHTML = '';
+            
+            const activeRentals = rentals.filter(r => !r.Devolvido);
+            
+            for (let i = 0; i < activeRentals.length; i++) {
+                const rental = activeRentals[i];
+                
+                const paymentStatus = rental.Pago ? 
+                    '<span class="badge bg-success">Pago</span>' : 
+                    '<span class="badge bg-danger">Aberto</span>';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${rental.Cliente}</td>
+                    <td>${rental.Produto}</td>
+                    <td>${formatDate(rental.Data)}</td>
+                    <td>${rental.Dias}</td>
+                    <td>R$ ${(rental.Dias * rental.ValorDiaria).toFixed(2)}</td>
+                    <td>${paymentStatus}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary register-return" data-id="${i}">
+                            <i class="bi bi-arrow-return-left"></i> Devolver
+                        </button>
+                    </td>
+                `;
+                
+                table.appendChild(row);
+            }
+            
+            // Add event listeners to return buttons
+            document.querySelectorAll('.register-return').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    showReturnModal(id);
+                });
+            });
+        }
+        
+        function showReturnModal(id) {
+            const rental = rentals[id];
+            if (!rental) return;
+            
+            document.getElementById('return-rental-id').value = id;
+            document.getElementById('return-client').value = rental.Cliente;
+            document.getElementById('return-product').value = rental.Produto;
+            document.getElementById('return-date').value = formatDate(rental.Data);
+            document.getElementById('return-days').value = rental.Dias;
+            document.getElementById('return-total').value = `R$ ${(rental.Dias * rental.ValorDiaria).toFixed(2)}`;
+            document.getElementById('return-payment').value = rental.Pago ? 'Pago' : 'Pendente';
+            
+            const modal = new bootstrap.Modal(document.getElementById('returnModal'));
+            modal.show();
+        }
+        
+        function updateDebtsTable() {
+            const table = document.getElementById('debts-table').querySelector('tbody');
+            table.innerHTML = '';
+            
+            for (let i = 0; i < debts.length; i++) {
+                const debt = debts[i];
+                
+                const status = debt.Pago ? 
+                    '<span class="badge bg-success">Pago</span>' : 
+                    '<span class="badge bg-danger">Aberto</span>';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${debt.Pessoa}</td>
+                    <td>${debt.Descricao}</td>
+                    <td>${formatDate(debt.Data)}</td>
+                    <td>R$ ${debt.ValorTotal.toFixed(2)}</td>
+                    <td>R$ ${debt.ValorPago.toFixed(2)}</td>
+                    <td>${status}</td>
+                    <td>
+                        ${!debt.Pago ? `<button class="btn btn-sm btn-outline-success register-payment" data-id="${i}">
+                            <i class="bi bi-cash"></i> Pagar
+                        </button>` : ''}
+                    </td>
+                `;
+                
+                table.appendChild(row);
+            }
+            
+            // Add event listeners to payment buttons
+            document.querySelectorAll('.register-payment').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    showPaymentModal(id);
+                });
+            });
+        }
+        
+        function showPaymentModal(id) {
+            const debt = debts[id];
+            if (!debt) return;
+            
+            document.getElementById('payment-debt-id').value = id;
+            document.getElementById('payment-person').value = debt.Pessoa;
+            document.getElementById('payment-description').value = debt.Descricao;
+            document.getElementById('payment-total').value = `R$ ${debt.ValorTotal.toFixed(2)}`;
+            document.getElementById('payment-already-paid').value = `R$ ${debt.ValorPago.toFixed(2)}`;
+            document.getElementById('payment-amount').value = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+            modal.show();
+        }
+        
+        function updateReports() {
+            // Update rental stats
+            const totalRentals = rentals.reduce((sum, r) => sum + (r.Dias * r.ValorDiaria), 0);
+            const paidRentals = rentals.filter(r => r.Pago).reduce((sum, r) => sum + (r.Dias * r.ValorDiaria), 0);
+            const unpaidRentals = totalRentals - paidRentals;
+            
+            document.getElementById('total-rentals').textContent = `R$ ${totalRentals.toFixed(2)}`;
+            document.getElementById('paid-rentals').textContent = `R$ ${paidRentals.toFixed(2)}`;
+            document.getElementById('unpaid-rentals').textContent = `R$ ${unpaidRentals.toFixed(2)}`;
+            
+            // Update debt stats
+            const totalDebts = debts.reduce((sum, d) => sum + d.ValorTotal, 0);
+            const paidDebts = debts.reduce((sum, d) => sum + d.ValorPago, 0);
+            const unpaidDebts = totalDebts - paidDebts;
+            
+            document.getElementById('total-debts-report').textContent = `R$ ${totalDebts.toFixed(2)}`;
+            document.getElementById('paid-debts').textContent = `R$ ${paidDebts.toFixed(2)}`;
+            document.getElementById('unpaid-debts').textContent = `R$ ${unpaidDebts.toFixed(2)}`;
+            
+            // Update final balance
+            const finalBalance = paidRentals - paidDebts;
+            document.getElementById('final-balance').textContent = `R$ ${finalBalance.toFixed(2)}`;
+            
+            // Update charts
+            updateCharts(totalRentals, paidRentals, unpaidRentals, totalDebts, paidDebts, unpaidDebts);
+        }
+        
+        function updateCharts(totalRentals, paidRentals, unpaidRentals, totalDebts, paidDebts, unpaidDebts) {
+            // Rental chart
+            const rentalsCtx = document.getElementById('rentalsChart').getContext('2d');
+            
+            if (window.rentalsChart) {
+                window.rentalsChart.destroy();
+            }
+            
+            window.rentalsChart = new Chart(rentalsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Recebidos', 'Em Aberto'],
+                    datasets: [{
+                        data: [paidRentals, unpaidRentals],
+                        backgroundColor: ['#27ae60', '#e74c3c'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Debt chart
+            const debtsCtx = document.getElementById('debtsChart').getContext('2d');
+            
+            if (window.debtsChart) {
+                window.debtsChart.destroy();
+            }
+            
+            window.debtsChart = new Chart(debtsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pagas', 'Em Aberto'],
+                    datasets: [{
+                        data: [paidDebts, unpaidDebts],
+                        backgroundColor: ['#27ae60', '#e74c3c'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function formatDate(date) {
+            if (!(date instanceof Date)) {
+                date = new Date(date);
+            }
+            
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            
+            return `${day}/${month}/${year}`;
+        }
+    </script>
+</body>
+</html>
