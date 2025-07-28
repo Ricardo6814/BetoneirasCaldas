@@ -649,6 +649,47 @@
         </div>
     </div>
 
+    <!-- Payment Rental Modal -->
+    <div class="modal fade" id="paymentRentalModal" tabindex="-1" aria-labelledby="paymentRentalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentRentalModalLabel"><i class="bi bi-cash"></i> Registrar Pagamento de Aluguel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="payment-rental-form">
+                        <input type="hidden" id="payment-rental-id">
+                        <div class="mb-3">
+                            <label for="payment-rental-client" class="form-label">Cliente</label>
+                            <input type="text" class="form-control" id="payment-rental-client" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payment-rental-product" class="form-label">Produto</label>
+                            <input type="text" class="form-control" id="payment-rental-product" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payment-rental-total" class="form-label">Valor Total (R$)</label>
+                            <input type="text" class="form-control" id="payment-rental-total" readonly>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="payment-rental-full">
+                            <label class="form-check-label" for="payment-rental-full">Pagamento total</label>
+                        </div>
+                        <div class="mb-3" id="partial-payment-container" style="display: none;">
+                            <label for="payment-rental-amount" class="form-label">Valor do Pagamento (R$)</label>
+                            <input type="number" step="0.01" class="form-control" id="payment-rental-amount" min="0">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="save-rental-payment">Registrar Pagamento</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Return Modal -->
     <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -935,7 +976,7 @@
                 showToast('Dívida registrada com sucesso!');
             });
             
-            // Modal de pagamento
+            // Modal de pagamento de dívida
             document.getElementById('save-payment').addEventListener('click', function() {
                 const id = parseInt(document.getElementById('payment-debt-id').value);
                 const divida = DB.debts.find(d => d.id === id);
@@ -952,12 +993,36 @@
                 }
             });
             
+            // Modal de pagamento de aluguel
+            document.getElementById('save-rental-payment').addEventListener('click', function() {
+                const id = parseInt(document.getElementById('payment-rental-id').value);
+                const aluguel = DB.rentals.find(r => r.id === id);
+                const isFullPayment = document.getElementById('payment-rental-full').checked;
+                const amount = isFullPayment ? aluguel.valorTotal : 
+                    parseFloat(document.getElementById('payment-rental-amount').value);
+                
+                if (!isFullPayment && (!amount || amount <= 0)) {
+                    showToast('Informe um valor válido para o pagamento!', 'danger');
+                    return;
+                }
+                
+                aluguel.pago = isFullPayment;
+                DB.save();
+                loadData();
+                bootstrap.Modal.getInstance(document.getElementById('paymentRentalModal')).hide();
+                showToast(`Pagamento de ${formatCurrency(amount)} registrado com sucesso!`);
+            });
+            
             // Modal de devolução
             document.getElementById('confirm-return').addEventListener('click', function() {
                 const id = parseInt(document.getElementById('return-rental-id').value);
                 const aluguel = DB.rentals.find(r => r.id === id);
                 
                 if (aluguel) {
+                    if (!aluguel.pago && !confirm('Este aluguel não foi pago. Deseja realmente registrar a devolução?')) {
+                        return;
+                    }
+                    
                     aluguel.devolvido = true;
                     const product = DB.products.find(p => p.nome === aluguel.produto);
                     if (product) {
@@ -1052,10 +1117,79 @@
                         showToast('Produto excluído com sucesso!');
                     }
                 }
+                
+                // Editar dívida
+                if (e.target.closest('.edit-debt')) {
+                    const id = parseInt(e.target.closest('.edit-debt').getAttribute('data-id'));
+                    const divida = DB.debts.find(d => d.id === id);
+                    
+                    if (divida) {
+                        document.getElementById('debt-person').value = divida.pessoa;
+                        document.getElementById('debt-description').value = divida.descricao;
+                        document.getElementById('debt-total').value = divida.valorTotal;
+                        document.getElementById('debt-paid').value = divida.valorPago;
+                        document.getElementById('debt-date').value = divida.data.split('T')[0];
+                        document.getElementById('debt-is-paid').checked = divida.pago;
+                        
+                        const modal = new bootstrap.Modal(document.getElementById('addDebtModal'));
+                        modal.show();
+                        
+                        // Altera o título do modal
+                        document.getElementById('addDebtModalLabel').innerHTML = '<i class="bi bi-credit-card"></i> Editar Dívida';
+                        
+                        // Altera o botão de salvar para atualizar
+                        const saveBtn = document.getElementById('save-debt');
+                        saveBtn.textContent = 'Atualizar';
+                        saveBtn.onclick = function() {
+                            divida.pessoa = document.getElementById('debt-person').value;
+                            divida.descricao = document.getElementById('debt-description').value;
+                            divida.valorTotal = parseFloat(document.getElementById('debt-total').value);
+                            divida.valorPago = parseFloat(document.getElementById('debt-paid').value);
+                            divida.data = document.getElementById('debt-date').value || new Date().toISOString();
+                            divida.pago = document.getElementById('debt-is-paid').checked;
+                            
+                            DB.save();
+                            loadData();
+                            modal.hide();
+                            document.getElementById('debt-form').reset();
+                            showToast('Dívida atualizada com sucesso!');
+                            
+                            // Restaura o modal para adição
+                            document.getElementById('addDebtModalLabel').innerHTML = '<i class="bi bi-credit-card"></i> Nova Dívida';
+                            saveBtn.textContent = 'Salvar';
+                            saveBtn.onclick = originalSaveDebtFunction;
+                        };
+                    }
+                }
+                
+                // Excluir dívida
+                if (e.target.closest('.delete-debt')) {
+                    const id = parseInt(e.target.closest('.delete-debt').getAttribute('data-id'));
+                    if (confirm('Tem certeza que deseja excluir esta dívida?')) {
+                        DB.debts = DB.debts.filter(d => d.id !== id);
+                        DB.save();
+                        loadData();
+                        showToast('Dívida excluída com sucesso!');
+                    }
+                }
+                
+                // Excluir aluguel
+                if (e.target.closest('.delete-rental')) {
+                    const id = parseInt(e.target.closest('.delete-rental').getAttribute('data-id'));
+                    if (confirm('Tem certeza que deseja excluir este aluguel?')) {
+                        DB.rentals = DB.rentals.filter(r => r.id !== id);
+                        DB.save();
+                        loadData();
+                        showToast('Aluguel excluído com sucesso!');
+                    }
+                }
             });
             
-            // Salvar a função original do botão Salvar
+            // Salvar a função original do botão Salvar produto
             const originalSaveProductFunction = document.getElementById('save-product').onclick;
+            
+            // Salvar a função original do botão Salvar dívida
+            const originalSaveDebtFunction = document.getElementById('save-debt').onclick;
         }
 
         // Atualiza o valor total do aluguel no modal
@@ -1091,10 +1225,10 @@
                     <td>${formatCurrency(p.valorDiaria)}</td>
                     <td>${formatCurrency(totalValue)}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary edit-product" data-id="${p.id}">
+                        <button class="btn btn-sm btn-outline-primary edit-product" data-id="${p.id}" title="Editar produto">
                             <i class="bi bi-pencil"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger delete-product" data-id="${p.id}">
+                        <button class="btn btn-sm btn-outline-danger delete-product" data-id="${p.id}" title="Excluir produto">
                             <i class="bi bi-trash"></i>
                         </button>
                     </td>
@@ -1133,17 +1267,31 @@
                     <td><span class="badge ${a.pago ? 'badge-paid' : 'badge-unpaid'}">${a.pago ? 'Pago' : 'Aberto'}</span></td>
                     <td><span class="badge ${a.devolvido ? 'badge-returned' : 'badge-rented'}">${a.devolvido ? 'Devolvido' : 'Em uso'}</span></td>
                     <td>
-                        ${!a.devolvido ? `<button class="btn btn-sm btn-outline-success register-return" data-id="${a.id}">
+                        ${!a.pago ? `<button class="btn btn-sm btn-outline-success pay-rental" data-id="${a.id}" title="Registrar pagamento">
+                            <i class="bi bi-cash"></i>
+                        </button>` : ''}
+                        ${!a.devolvido ? `<button class="btn btn-sm btn-outline-primary return-rental" data-id="${a.id}" title="Registrar devolução">
                             <i class="bi bi-arrow-return-left"></i>
                         </button>` : ''}
+                        <button class="btn btn-sm btn-outline-danger delete-rental" data-id="${a.id}" title="Excluir aluguel">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 `;
                 
                 table.appendChild(row);
             }
             
-            // Configura eventos para botões de devolução
-            document.querySelectorAll('.register-return').forEach(btn => {
+            // Configura eventos para os botões
+            document.querySelectorAll('.pay-rental').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const aluguel = DB.rentals.find(r => r.id === id);
+                    if (aluguel) showPaymentRentalModal(aluguel);
+                });
+            });
+            
+            document.querySelectorAll('.return-rental').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = parseInt(this.getAttribute('data-id'));
                     const aluguel = DB.rentals.find(r => r.id === id);
@@ -1167,7 +1315,10 @@
                     <td>${formatCurrency(a.valorTotal)}</td>
                     <td><span class="badge ${a.pago ? 'bg-success' : 'bg-danger'}">${a.pago ? 'Pago' : 'Aberto'}</span></td>
                     <td>
-                        <button class="btn btn-sm btn-primary register-return" data-id="${a.id}">
+                        ${!a.pago ? `<button class="btn btn-sm btn-outline-success pay-rental" data-id="${a.id}" title="Registrar pagamento">
+                            <i class="bi bi-cash"></i>
+                        </button>` : ''}
+                        <button class="btn btn-sm btn-primary return-rental" data-id="${a.id}" title="Registrar devolução">
                             <i class="bi bi-arrow-return-left"></i> Devolver
                         </button>
                     </td>
@@ -1176,8 +1327,16 @@
                 table.appendChild(row);
             }
             
-            // Configura eventos para botões de devolução
-            document.querySelectorAll('.register-return').forEach(btn => {
+            // Configura eventos para os botões
+            document.querySelectorAll('.pay-rental').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const aluguel = DB.rentals.find(r => r.id === id);
+                    if (aluguel) showPaymentRentalModal(aluguel);
+                });
+            });
+            
+            document.querySelectorAll('.return-rental').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = parseInt(this.getAttribute('data-id'));
                     const aluguel = DB.rentals.find(r => r.id === id);
@@ -1201,23 +1360,75 @@
                     <td>${formatCurrency(d.valorPago)}</td>
                     <td><span class="badge ${d.pago ? 'bg-success' : 'bg-danger'}">${d.pago ? 'Pago' : 'Aberto'}</span></td>
                     <td>
-                        ${!d.pago ? `<button class="btn btn-sm btn-outline-success register-payment" data-id="${d.id}">
-                            <i class="bi bi-cash"></i> Pagar
+                        ${!d.pago ? `<button class="btn btn-sm btn-outline-success pay-debt" data-id="${d.id}" title="Registrar pagamento">
+                            <i class="bi bi-cash"></i>
                         </button>` : ''}
+                        <button class="btn btn-sm btn-outline-primary edit-debt" data-id="${d.id}" title="Editar dívida">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger delete-debt" data-id="${d.id}" title="Excluir dívida">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 `;
                 
                 table.appendChild(row);
             }
             
-            // Configura eventos para botões de pagamento
-            document.querySelectorAll('.register-payment').forEach(btn => {
+            // Configura eventos para os botões
+            document.querySelectorAll('.pay-debt').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = parseInt(this.getAttribute('data-id'));
                     const divida = DB.debts.find(d => d.id === id);
                     if (divida) showPaymentModal(divida);
                 });
             });
+            
+            document.querySelectorAll('.edit-debt').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const divida = DB.debts.find(d => d.id === id);
+                    if (divida) showEditDebtModal(divida);
+                });
+            });
+        }
+
+        // Mostra o modal de pagamento de dívida
+        function showPaymentModal(divida) {
+            document.getElementById('payment-debt-id').value = divida.id;
+            document.getElementById('payment-person').value = divida.pessoa;
+            document.getElementById('payment-description').value = divida.descricao;
+            document.getElementById('payment-total').value = formatCurrency(divida.valorTotal);
+            document.getElementById('payment-already-paid').value = formatCurrency(divida.valorPago);
+            document.getElementById('payment-amount').value = '';
+            
+            new bootstrap.Modal(document.getElementById('paymentModal')).show();
+        }
+
+        // Mostra o modal de pagamento de aluguel
+        function showPaymentRentalModal(aluguel) {
+            document.getElementById('payment-rental-id').value = aluguel.id;
+            document.getElementById('payment-rental-client').value = aluguel.cliente;
+            document.getElementById('payment-rental-product').value = aluguel.produto;
+            document.getElementById('payment-rental-total').value = formatCurrency(aluguel.valorTotal);
+            document.getElementById('payment-rental-amount').value = '';
+            document.getElementById('payment-rental-full').checked = true;
+            document.getElementById('partial-payment-container').style.display = 'none';
+            
+            new bootstrap.Modal(document.getElementById('paymentRentalModal')).show();
+        }
+
+        // Mostra o modal de devolução
+        function showReturnModal(aluguel) {
+            document.getElementById('return-rental-id').value = aluguel.id;
+            document.getElementById('return-client').value = aluguel.cliente;
+            document.getElementById('return-product').value = aluguel.produto;
+            document.getElementById('return-date').value = formatDate(aluguel.data);
+            document.getElementById('return-days').value = aluguel.dias;
+            document.getElementById('return-total').value = formatCurrency(aluguel.valorTotal);
+            document.getElementById('return-payment').value = aluguel.pago ? 'Pago' : 'Pendente';
+            
+            new bootstrap.Modal(document.getElementById('returnModal')).show();
         }
 
         // Formata data para exibição
