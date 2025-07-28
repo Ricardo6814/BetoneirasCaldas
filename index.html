@@ -136,6 +136,19 @@
             color: white;
             font-weight: bold;
         }
+
+        /* Toast styles */
+        .toast {
+            transition: opacity 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast:not(.show) {
+            opacity: 0;
+        }
         
         @media (max-width: 768px) {
             .sidebar {
@@ -684,9 +697,31 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Base URL da API - ajuste conforme necessário
-        const API_BASE_URL = 'http://localhost:5000/api';
-        
+        // Banco de dados local usando localStorage
+        const DB = {
+            products: JSON.parse(localStorage.getItem('products')) || [],
+            rentals: JSON.parse(localStorage.getItem('rentals')) || [],
+            debts: JSON.parse(localStorage.getItem('debts')) || [],
+            
+            save: function() {
+                localStorage.setItem('products', JSON.stringify(this.products));
+                localStorage.setItem('rentals', JSON.stringify(this.rentals));
+                localStorage.setItem('debts', JSON.stringify(this.debts));
+                console.log('Dados salvos no localStorage');
+            },
+            
+            // Métodos para gerar IDs únicos
+            nextProductId: function() {
+                return this.products.length > 0 ? Math.max(...this.products.map(p => p.id)) + 1 : 1;
+            },
+            nextRentalId: function() {
+                return this.rentals.length > 0 ? Math.max(...this.rentals.map(r => r.id)) + 1 : 1;
+            },
+            nextDebtId: function() {
+                return this.debts.length > 0 ? Math.max(...this.debts.map(d => d.id)) + 1 : 1;
+            }
+        };
+
         // Elementos da interface
         const sections = {
             dashboard: document.getElementById('dashboard-section'),
@@ -741,79 +776,55 @@
 
         // Carrega todos os dados iniciais
         function loadData() {
-            fetch(`${API_BASE_URL}/produtos`)
-                .then(response => response.json())
-                .then(data => {
-                    updateProductsTable(data);
-                    updateProductDropdown(data);
-                });
-                
-            fetch(`${API_BASE_URL}/alugueis`)
-                .then(response => response.json())
-                .then(data => {
-                    updateRentalsTable(data);
-                    updateActiveRentalsTable(data);
-                });
-                
-            fetch(`${API_BASE_URL}/dividas`)
-                .then(response => response.json())
-                .then(data => {
-                    updateDebtsTable(data);
-                    refreshDashboard();
-                });
+            updateProductsTable(DB.products);
+            updateProductDropdown(DB.products);
+            updateRentalsTable(DB.rentals);
+            updateActiveRentalsTable(DB.rentals.filter(r => !r.devolvido));
+            updateDebtsTable(DB.debts);
+            refreshDashboard();
         }
 
         // Atualiza o dashboard
         function refreshDashboard() {
-            fetch(`${API_BASE_URL}/alugueis`)
-                .then(response => response.json())
-                .then(alugueis => {
-                    const totalRevenue = alugueis.reduce((sum, r) => sum + r.valorTotal, 0);
-                    const recebidos = alugueis.filter(a => a.pago).reduce((sum, r) => sum + r.valorTotal, 0);
-                    
-                    document.getElementById('total-revenue').textContent = formatCurrency(totalRevenue);
-                    document.getElementById('paid-rentals').textContent = formatCurrency(recebidos);
-                    document.getElementById('unpaid-rentals').textContent = formatCurrency(totalRevenue - recebidos);
-                    
-                    // Atualiza tabela de aluguéis recentes
-                    const recentRentals = alugueis.slice(0, 5);
-                    updateRecentTable('recent-rentals', recentRentals, r => [
-                        r.cliente, 
-                        r.produto,
-                        `<span class="badge ${r.pago ? 'bg-success' : 'bg-warning'}">${r.pago ? 'Pago' : 'Aberto'}</span>`
-                    ]);
-                });
-                
-            fetch(`${API_BASE_URL}/dividas`)
-                .then(response => response.json())
-                .then(dividas => {
-                    const totalDebts = dividas.reduce((sum, d) => sum + d.valorTotal, 0);
-                    const totalPaid = dividas.reduce((sum, d) => sum + d.valorPago, 0);
-                    
-                    document.getElementById('total-debts').textContent = formatCurrency(totalDebts);
-                    document.getElementById('total-debts-report').textContent = formatCurrency(totalDebts);
-                    document.getElementById('paid-debts').textContent = formatCurrency(totalPaid);
-                    document.getElementById('unpaid-debts').textContent = formatCurrency(totalDebts - totalPaid);
-                    
-                    // Calcula saldo final
-                    const saldo = (document.getElementById('paid-rentals').textContent.replace('R$ ', '').replace(',', '') * 1) - 
-                                 (document.getElementById('paid-debts').textContent.replace('R$ ', '').replace(',', '') * 1);
-                    document.getElementById('final-balance').textContent = formatCurrency(saldo);
-                    
-                    // Atualiza tabela de dívidas recentes
-                    const recentDebts = dividas.slice(0, 5);
-                    updateRecentTable('recent-debts', recentDebts, d => [
-                        d.pessoa, 
-                        formatCurrency(d.valorTotal),
-                        `<span class="badge ${d.pago ? 'bg-success' : 'bg-danger'}">${d.pago ? 'Pago' : 'Aberto'}</span>`
-                    ]);
-                });
-                
-            fetch(`${API_BASE_URL}/produtos`)
-                .then(response => response.json())
-                .then(produtos => {
-                    document.getElementById('total-products').textContent = produtos.length;
-                });
+            // Total de produtos
+            document.getElementById('total-products').textContent = DB.products.length;
+            
+            // Receita de aluguéis
+            const totalRevenue = DB.rentals.reduce((sum, r) => sum + r.valorTotal, 0);
+            const recebidos = DB.rentals.filter(a => a.pago).reduce((sum, r) => sum + r.valorTotal, 0);
+            
+            document.getElementById('total-revenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('paid-rentals').textContent = formatCurrency(recebidos);
+            document.getElementById('unpaid-rentals').textContent = formatCurrency(totalRevenue - recebidos);
+            
+            // Tabela de aluguéis recentes
+            const recentRentals = DB.rentals.slice().reverse().slice(0, 5);
+            updateRecentTable('recent-rentals', recentRentals, r => [
+                r.cliente, 
+                r.produto,
+                `<span class="badge ${r.pago ? 'bg-success' : 'bg-warning'}">${r.pago ? 'Pago' : 'Aberto'}</span>`
+            ]);
+            
+            // Dívidas
+            const totalDebts = DB.debts.reduce((sum, d) => sum + d.valorTotal, 0);
+            const totalPaid = DB.debts.reduce((sum, d) => sum + d.valorPago, 0);
+            
+            document.getElementById('total-debts').textContent = formatCurrency(totalDebts);
+            document.getElementById('total-debts-report').textContent = formatCurrency(totalDebts);
+            document.getElementById('paid-debts').textContent = formatCurrency(totalPaid);
+            document.getElementById('unpaid-debts').textContent = formatCurrency(totalDebts - totalPaid);
+            
+            // Tabela de dívidas recentes
+            const recentDebts = DB.debts.slice().reverse().slice(0, 5);
+            updateRecentTable('recent-debts', recentDebts, d => [
+                d.pessoa, 
+                formatCurrency(d.valorTotal),
+                `<span class="badge ${d.pago ? 'bg-success' : 'bg-danger'}">${d.pago ? 'Pago' : 'Aberto'}</span>`
+            ]);
+            
+            // Saldo final
+            const saldo = recebidos - totalPaid;
+            document.getElementById('final-balance').textContent = formatCurrency(saldo);
         }
 
         // Atualiza uma tabela de dados recentes
@@ -833,23 +844,19 @@
             // Modal de produto
             document.getElementById('save-product').addEventListener('click', function() {
                 const produto = {
+                    id: DB.nextProductId(),
                     nome: document.getElementById('product-name').value,
                     quantidadeDisponivel: parseInt(document.getElementById('product-quantity').value),
                     valorDiaria: parseFloat(document.getElementById('product-daily-rate').value)
                 };
                 
-                fetch(`${API_BASE_URL}/produtos`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(produto)
-                })
-                .then(response => response.json())
-                .then(() => {
-                    loadData();
-                    bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
-                    document.getElementById('product-form').reset();
-                    showToast('Produto adicionado com sucesso!');
-                });
+                DB.products.push(produto);
+                DB.save();
+                
+                loadData();
+                bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+                document.getElementById('product-form').reset();
+                showToast('Produto adicionado com sucesso!');
             });
             
             // Modal de aluguel
@@ -857,49 +864,60 @@
                 const productName = this.value;
                 if (!productName) return;
                 
-                fetch(`${API_BASE_URL}/produtos`)
-                    .then(response => response.json())
-                    .then(produtos => {
-                        const produto = produtos.find(p => p.nome === productName);
-                        if (produto) {
-                            document.getElementById('product-info').textContent = 
-                                `Disponível: ${produto.quantidadeDisponivel} | Diária: ${formatCurrency(produto.valorDiaria)}`;
-                            updateRentalTotal();
-                        }
-                    });
+                const produto = DB.products.find(p => p.nome === productName);
+                if (produto) {
+                    document.getElementById('product-info').textContent = 
+                        `Disponível: ${produto.quantidadeDisponivel} | Diária: ${formatCurrency(produto.valorDiaria)}`;
+                    updateRentalTotal();
+                }
             });
             
             document.getElementById('rental-days').addEventListener('input', updateRentalTotal);
             document.getElementById('rental-quantity').addEventListener('input', updateRentalTotal);
             
             document.getElementById('save-rental').addEventListener('click', function() {
+                const productName = document.getElementById('rental-product').value;
+                const product = DB.products.find(p => p.nome === productName);
+                
+                if (!product) {
+                    showToast('Produto não encontrado!', 'danger');
+                    return;
+                }
+                
+                if (product.quantidadeDisponivel < parseInt(document.getElementById('rental-quantity').value)) {
+                    showToast('Quantidade indisponível!', 'danger');
+                    return;
+                }
+                
                 const aluguel = {
+                    id: DB.nextRentalId(),
                     cliente: document.getElementById('rental-client').value,
-                    produto: document.getElementById('rental-product').value,
+                    produto: productName,
                     dias: parseInt(document.getElementById('rental-days').value),
-                    valorDiaria: 0, // Será calculado pelo backend
+                    quantidade: parseInt(document.getElementById('rental-quantity').value),
+                    valorDiaria: product.valorDiaria,
+                    valorTotal: product.valorDiaria * parseInt(document.getElementById('rental-days').value) * parseInt(document.getElementById('rental-quantity').value),
                     pago: document.getElementById('rental-paid').checked,
                     data: new Date().toISOString(),
                     devolvido: false
                 };
                 
-                fetch(`${API_BASE_URL}/alugueis`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(aluguel)
-                })
-                .then(response => response.json())
-                .then(() => {
-                    loadData();
-                    bootstrap.Modal.getInstance(document.getElementById('addRentalModal')).hide();
-                    document.getElementById('rental-form').reset();
-                    showToast('Aluguel registrado com sucesso!');
-                });
+                // Atualizar quantidade disponível
+                product.quantidadeDisponivel -= aluguel.quantidade;
+                
+                DB.rentals.push(aluguel);
+                DB.save();
+                
+                loadData();
+                bootstrap.Modal.getInstance(document.getElementById('addRentalModal')).hide();
+                document.getElementById('rental-form').reset();
+                showToast('Aluguel registrado com sucesso!');
             });
             
             // Modal de dívida
             document.getElementById('save-debt').addEventListener('click', function() {
                 const divida = {
+                    id: DB.nextDebtId(),
                     pessoa: document.getElementById('debt-person').value,
                     descricao: document.getElementById('debt-description').value,
                     valorTotal: parseFloat(document.getElementById('debt-total').value),
@@ -908,90 +926,154 @@
                     pago: document.getElementById('debt-is-paid').checked
                 };
                 
-                fetch(`${API_BASE_URL}/dividas`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(divida)
-                })
-                .then(response => response.json())
-                .then(() => {
-                    loadData();
-                    bootstrap.Modal.getInstance(document.getElementById('addDebtModal')).hide();
-                    document.getElementById('debt-form').reset();
-                    showToast('Dívida registrada com sucesso!');
-                });
+                DB.debts.push(divida);
+                DB.save();
+                
+                loadData();
+                bootstrap.Modal.getInstance(document.getElementById('addDebtModal')).hide();
+                document.getElementById('debt-form').reset();
+                showToast('Dívida registrada com sucesso!');
             });
             
             // Modal de pagamento
             document.getElementById('save-payment').addEventListener('click', function() {
-                const id = document.getElementById('payment-debt-id').value;
+                const id = parseInt(document.getElementById('payment-debt-id').value);
+                const divida = DB.debts.find(d => d.id === id);
                 const valor = parseFloat(document.getElementById('payment-amount').value);
                 
-                fetch(`${API_BASE_URL}/dividas/${id}/pagar`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ valor })
-                })
-                .then(response => response.json())
-                .then(() => {
+                if (divida) {
+                    divida.valorPago += valor;
+                    divida.pago = divida.valorPago >= divida.valorTotal;
+                    DB.save();
                     loadData();
                     bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
                     document.getElementById('payment-form').reset();
                     showToast('Pagamento registrado com sucesso!');
-                });
+                }
             });
             
             // Modal de devolução
             document.getElementById('confirm-return').addEventListener('click', function() {
-                const id = document.getElementById('return-rental-id').value;
+                const id = parseInt(document.getElementById('return-rental-id').value);
+                const aluguel = DB.rentals.find(r => r.id === id);
                 
-                fetch(`${API_BASE_URL}/alugueis/${id}/devolver`, {
-                    method: 'POST'
-                })
-                .then(response => response.json())
-                .then(() => {
+                if (aluguel) {
+                    aluguel.devolvido = true;
+                    const product = DB.products.find(p => p.nome === aluguel.produto);
+                    if (product) {
+                        product.quantidadeDisponivel += aluguel.quantidade;
+                    }
+                    DB.save();
                     loadData();
                     bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
                     showToast('Devolução registrada com sucesso!');
-                });
+                }
             });
             
             // Gerar relatório
             document.getElementById('generate-report').addEventListener('click', function() {
-                fetch(`${API_BASE_URL}/relatorios/gerar`)
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'relatorio_financeiro.pdf';
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                        showToast('Relatório gerado com sucesso!');
-                    });
+                // Cria um relatório simples em formato de texto
+                const relatorio = `
+                    Relatório Financeiro - ${new Date().toLocaleDateString('pt-BR')}
+                    ===================================
+                    
+                    Total de Produtos: ${DB.products.length}
+                    Total de Aluguéis: ${DB.rentals.length}
+                    Receita Total: ${formatCurrency(DB.rentals.reduce((sum, r) => sum + r.valorTotal, 0))}
+                    Dívidas Totais: ${formatCurrency(DB.debts.reduce((sum, d) => sum + d.valorTotal, 0))}
+                    Saldo Final: ${document.getElementById('final-balance').textContent}
+                    
+                    Últimos Aluguéis:
+                    ${DB.rentals.slice().reverse().slice(0, 5).map(r => 
+                        `${r.cliente} - ${r.produto} - ${formatCurrency(r.valorTotal)} - ${r.pago ? 'Pago' : 'Aberto'}`).join('\n')}
+                    
+                    Últimas Dívidas:
+                    ${DB.debts.slice().reverse().slice(0, 5).map(d => 
+                        `${d.pessoa} - ${d.descricao} - ${formatCurrency(d.valorTotal)} - ${d.pago ? 'Pago' : 'Aberto'}`).join('\n')}
+                `;
+                
+                // Cria um blob com o relatório
+                const blob = new Blob([relatorio], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `relatorio_${new Date().toISOString().slice(0, 10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showToast('Relatório gerado com sucesso!');
             });
+            
+            // Configura eventos para edição e exclusão de produtos
+            document.addEventListener('click', function(e) {
+                // Editar produto
+                if (e.target.closest('.edit-product')) {
+                    const id = parseInt(e.target.closest('.edit-product').getAttribute('data-id'));
+                    const produto = DB.products.find(p => p.id === id);
+                    
+                    if (produto) {
+                        document.getElementById('product-name').value = produto.nome;
+                        document.getElementById('product-quantity').value = produto.quantidadeDisponivel;
+                        document.getElementById('product-daily-rate').value = produto.valorDiaria;
+                        
+                        const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+                        modal.show();
+                        
+                        // Alterar o botão Salvar para Atualizar
+                        const saveBtn = document.getElementById('save-product');
+                        saveBtn.textContent = 'Atualizar';
+                        saveBtn.onclick = function() {
+                            produto.nome = document.getElementById('product-name').value;
+                            produto.quantidadeDisponivel = parseInt(document.getElementById('product-quantity').value);
+                            produto.valorDiaria = parseFloat(document.getElementById('product-daily-rate').value);
+                            
+                            DB.save();
+                            loadData();
+                            modal.hide();
+                            document.getElementById('product-form').reset();
+                            showToast('Produto atualizado com sucesso!');
+                            
+                            // Restaurar o botão Salvar
+                            saveBtn.textContent = 'Salvar';
+                            saveBtn.onclick = originalSaveProductFunction;
+                        };
+                    }
+                }
+                
+                // Excluir produto
+                if (e.target.closest('.delete-product')) {
+                    const id = parseInt(e.target.closest('.delete-product').getAttribute('data-id'));
+                    if (confirm('Tem certeza que deseja excluir este produto?')) {
+                        DB.products = DB.products.filter(p => p.id !== id);
+                        DB.save();
+                        loadData();
+                        showToast('Produto excluído com sucesso!');
+                    }
+                }
+            });
+            
+            // Salvar a função original do botão Salvar
+            const originalSaveProductFunction = document.getElementById('save-product').onclick;
         }
 
         // Atualiza o valor total do aluguel no modal
         function updateRentalTotal() {
             const productName = document.getElementById('rental-product').value;
             const days = parseInt(document.getElementById('rental-days').value) || 0;
+            const quantity = parseInt(document.getElementById('rental-quantity').value) || 0;
             
             if (!productName) {
                 document.getElementById('rental-total').textContent = 'R$ 0,00';
                 return;
             }
             
-            fetch(`${API_BASE_URL}/produtos`)
-                .then(response => response.json())
-                .then(produtos => {
-                    const produto = produtos.find(p => p.nome === productName);
-                    if (produto) {
-                        const total = days * produto.valorDiaria;
-                        document.getElementById('rental-total').textContent = formatCurrency(total);
-                    }
-                });
+            const produto = DB.products.find(p => p.nome === productName);
+            if (produto) {
+                const total = days * produto.valorDiaria * quantity;
+                document.getElementById('rental-total').textContent = formatCurrency(total);
+            }
         }
 
         // Atualiza a tabela de produtos
@@ -999,8 +1081,7 @@
             const table = document.getElementById('products-table').querySelector('tbody');
             table.innerHTML = '';
             
-            for (let i = 0; i < produtos.length; i++) {
-                const p = produtos[i];
+            for (const p of produtos) {
                 const totalValue = p.quantidadeDisponivel * p.valorDiaria;
                 
                 const row = document.createElement('tr');
@@ -1010,10 +1091,10 @@
                     <td>${formatCurrency(p.valorDiaria)}</td>
                     <td>${formatCurrency(totalValue)}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary edit-product" data-id="${i}">
+                        <button class="btn btn-sm btn-outline-primary edit-product" data-id="${p.id}">
                             <i class="bi bi-pencil"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger delete-product" data-id="${i}">
+                        <button class="btn btn-sm btn-outline-danger delete-product" data-id="${p.id}">
                             <i class="bi bi-trash"></i>
                         </button>
                     </td>
@@ -1041,9 +1122,7 @@
             const table = document.getElementById('rentals-table').querySelector('tbody');
             table.innerHTML = '';
             
-            for (let i = 0; i < alugueis.length; i++) {
-                const a = alugueis[i];
-                
+            for (const a of alugueis) {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${a.cliente}</td>
@@ -1054,7 +1133,7 @@
                     <td><span class="badge ${a.pago ? 'badge-paid' : 'badge-unpaid'}">${a.pago ? 'Pago' : 'Aberto'}</span></td>
                     <td><span class="badge ${a.devolvido ? 'badge-returned' : 'badge-rented'}">${a.devolvido ? 'Devolvido' : 'Em uso'}</span></td>
                     <td>
-                        ${!a.devolvido ? `<button class="btn btn-sm btn-outline-success register-return" data-id="${i}">
+                        ${!a.devolvido ? `<button class="btn btn-sm btn-outline-success register-return" data-id="${a.id}">
                             <i class="bi bi-arrow-return-left"></i>
                         </button>` : ''}
                     </td>
@@ -1066,8 +1145,9 @@
             // Configura eventos para botões de devolução
             document.querySelectorAll('.register-return').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    showReturnModal(alugueis[id]);
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const aluguel = DB.rentals.find(r => r.id === id);
+                    if (aluguel) showReturnModal(aluguel);
                 });
             });
         }
@@ -1077,11 +1157,7 @@
             const table = document.getElementById('active-rentals').querySelector('tbody');
             table.innerHTML = '';
             
-            const ativos = alugueis.filter(a => !a.devolvido);
-            
-            for (let i = 0; i < ativos.length; i++) {
-                const a = ativos[i];
-                
+            for (const a of alugueis) {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${a.cliente}</td>
@@ -1091,7 +1167,7 @@
                     <td>${formatCurrency(a.valorTotal)}</td>
                     <td><span class="badge ${a.pago ? 'bg-success' : 'bg-danger'}">${a.pago ? 'Pago' : 'Aberto'}</span></td>
                     <td>
-                        <button class="btn btn-sm btn-primary register-return" data-id="${i}">
+                        <button class="btn btn-sm btn-primary register-return" data-id="${a.id}">
                             <i class="bi bi-arrow-return-left"></i> Devolver
                         </button>
                     </td>
@@ -1103,23 +1179,11 @@
             // Configura eventos para botões de devolução
             document.querySelectorAll('.register-return').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    showReturnModal(ativos[id]);
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const aluguel = DB.rentals.find(r => r.id === id);
+                    if (aluguel) showReturnModal(aluguel);
                 });
             });
-        }
-
-        // Mostra o modal de devolução
-        function showReturnModal(aluguel) {
-            document.getElementById('return-rental-id').value = aluguel.id;
-            document.getElementById('return-client').value = aluguel.cliente;
-            document.getElementById('return-product').value = aluguel.produto;
-            document.getElementById('return-date').value = formatDate(aluguel.data);
-            document.getElementById('return-days').value = aluguel.dias;
-            document.getElementById('return-total').value = formatCurrency(aluguel.valorTotal);
-            document.getElementById('return-payment').value = aluguel.pago ? 'Pago' : 'Pendente';
-            
-            new bootstrap.Modal(document.getElementById('returnModal')).show();
         }
 
         // Atualiza a tabela de dívidas
@@ -1127,9 +1191,7 @@
             const table = document.getElementById('debts-table').querySelector('tbody');
             table.innerHTML = '';
             
-            for (let i = 0; i < dividas.length; i++) {
-                const d = dividas[i];
-                
+            for (const d of dividas) {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${d.pessoa}</td>
@@ -1139,7 +1201,7 @@
                     <td>${formatCurrency(d.valorPago)}</td>
                     <td><span class="badge ${d.pago ? 'bg-success' : 'bg-danger'}">${d.pago ? 'Pago' : 'Aberto'}</span></td>
                     <td>
-                        ${!d.pago ? `<button class="btn btn-sm btn-outline-success register-payment" data-id="${i}">
+                        ${!d.pago ? `<button class="btn btn-sm btn-outline-success register-payment" data-id="${d.id}">
                             <i class="bi bi-cash"></i> Pagar
                         </button>` : ''}
                     </td>
@@ -1151,22 +1213,11 @@
             // Configura eventos para botões de pagamento
             document.querySelectorAll('.register-payment').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const id = this.getAttribute('data-id');
-                    showPaymentModal(dividas[id]);
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const divida = DB.debts.find(d => d.id === id);
+                    if (divida) showPaymentModal(divida);
                 });
             });
-        }
-
-        // Mostra o modal de pagamento
-        function showPaymentModal(divida) {
-            document.getElementById('payment-debt-id').value = divida.id;
-            document.getElementById('payment-person').value = divida.pessoa;
-            document.getElementById('payment-description').value = divida.descricao;
-            document.getElementById('payment-total').value = formatCurrency(divida.valorTotal);
-            document.getElementById('payment-already-paid').value = formatCurrency(divida.valorPago);
-            document.getElementById('payment-amount').value = '';
-            
-            new bootstrap.Modal(document.getElementById('paymentModal')).show();
         }
 
         // Formata data para exibição
@@ -1181,9 +1232,44 @@
         }
 
         // Mostra uma mensagem toast
-        function showToast(message) {
-            // Implementação simples - você pode substituir por um toast real se preferir
-            alert(message);
+        function showToast(message, type = 'success') {
+            // Remove toast existente se houver
+            const existingToast = document.getElementById('custom-toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // Cria o elemento toast
+            const toast = document.createElement('div');
+            toast.id = 'custom-toast';
+            toast.className = `toast show align-items-center text-white bg-${type}`;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.zIndex = '9999';
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Remove o toast após 3 segundos
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+            
+            // Configura o botão de fechar
+            toast.querySelector('button').addEventListener('click', () => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            });
         }
     </script>
 </body>
