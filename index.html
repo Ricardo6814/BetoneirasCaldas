@@ -44,8 +44,9 @@
             display: flex;
             flex-direction: column;
             padding: 0;
-            z-index: 100;
+            z-index: 200;
             box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .sidebar-brand {
@@ -157,6 +158,80 @@
         .user-name { color: #fff; font-size: 0.82rem; font-weight: 600; }
         .user-role { color: rgba(255,255,255,0.4); font-size: 0.7rem; }
 
+        /* ── OVERLAY ── */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 150;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.visible {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ── HAMBURGER ── */
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            transition: background 0.15s;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+            width: 38px; height: 38px;
+        }
+
+        .hamburger-btn:hover { background: var(--surface-2); }
+
+        .hamburger-btn .bar {
+            display: block;
+            width: 22px;
+            height: 2.5px;
+            background: var(--text);
+            border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center;
+        }
+
+        .hamburger-btn.open .bar:nth-child(1) {
+            transform: translateY(7.5px) rotate(45deg);
+        }
+        .hamburger-btn.open .bar:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .hamburger-btn.open .bar:nth-child(3) {
+            transform: translateY(-7.5px) rotate(-45deg);
+        }
+
+        /* ── SIDEBAR CLOSE BTN (mobile) ── */
+        .sidebar-close {
+            display: none;
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+        .sidebar-close:hover { background: rgba(255,255,255,0.2); }
+
         /* ── MAIN ── */
         .main-wrapper {
             margin-left: var(--sidebar-width);
@@ -173,6 +248,12 @@
             position: sticky;
             top: 0;
             z-index: 50;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .topbar-title {
@@ -346,6 +427,8 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .page-header-left h2 {
@@ -431,20 +514,151 @@
             to   { transform: translateY(0); opacity: 1; }
         }
 
-        /* ── RESPONSIVE ── */
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .main-wrapper { margin-left: 0; }
-        }
-
         /* Sections hidden */
         .section-hidden { display: none; }
+
+        /* ─────────────────────────────────────
+           RESPONSIVE — MOBILE FIRST
+        ───────────────────────────────────── */
+        @media (max-width: 768px) {
+            /* Sidebar desliza fora */
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            /* Botão fechar aparece dentro da sidebar */
+            .sidebar-close {
+                display: flex;
+            }
+
+            /* Hamburger aparece na topbar */
+            .hamburger-btn {
+                display: flex;
+            }
+
+            /* Main ocupa tela toda */
+            .main-wrapper {
+                margin-left: 0;
+            }
+
+            /* Topbar mais compacta */
+            .topbar {
+                padding: 12px 16px;
+            }
+
+            .topbar-title {
+                font-size: 0.95rem;
+            }
+
+            /* Conteúdo com padding menor */
+            .page-content {
+                padding: 16px;
+            }
+
+            /* Stats empilhados */
+            .stat-card {
+                padding: 16px;
+            }
+
+            .stat-value {
+                font-size: 1.3rem;
+            }
+
+            /* Tabelas: scroll horizontal */
+            .table-responsive-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Page header empilha no mobile */
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .page-header .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Modal ocupa mais espaço */
+            .modal-dialog {
+                margin: 12px;
+            }
+
+            .modal-body {
+                padding: 16px;
+            }
+
+            /* Row cols mobile */
+            .row-mobile-full > [class*="col-"] {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            /* Cards dashboard empilhados */
+            .dashboard-stats .col-md-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            .dashboard-recent .col-md-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            /* Reports */
+            .reports-cards .col-md-3 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+
+            .reports-charts .col-md-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            /* Toast posicionado melhor */
+            .toast-custom {
+                bottom: 16px;
+                right: 16px;
+                left: 16px;
+                font-size: 0.82rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .reports-cards .col-md-3 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            .topbar-date-text {
+                display: none;
+            }
+
+            .stat-label {
+                font-size: 0.68rem;
+            }
+        }
     </style>
 </head>
 <body>
 
+<!-- ═══════════════ OVERLAY ═══════════════ -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
 <!-- ═══════════════ SIDEBAR ═══════════════ -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebar-close" aria-label="Fechar menu">
+        <i class="bi bi-x"></i>
+    </button>
+
     <div class="sidebar-brand">
         <div class="sidebar-brand-icon"><i class="bi bi-hammer"></i></div>
         <h5>Betoneira Caldas</h5>
@@ -492,9 +706,16 @@
 <div class="main-wrapper">
     <!-- TOPBAR -->
     <header class="topbar">
-        <span class="topbar-title" id="topbar-title">Dashboard</span>
+        <div class="topbar-left">
+            <button class="hamburger-btn" id="hamburger-btn" aria-label="Abrir menu">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <span class="topbar-title" id="topbar-title">Dashboard</span>
+        </div>
         <div class="topbar-actions">
-            <span style="font-size:0.78rem; color:var(--text-muted);" id="topbar-date"></span>
+            <span class="topbar-date-text" style="font-size:0.78rem; color:var(--text-muted);" id="topbar-date"></span>
         </div>
     </header>
 
@@ -502,7 +723,7 @@
 
         <!-- ── DASHBOARD ── -->
         <div id="dashboard-section">
-            <div class="row g-3 mb-4">
+            <div class="row g-3 mb-4 dashboard-stats">
                 <div class="col-md-4">
                     <div class="stat-card">
                         <div class="stat-icon blue"><i class="bi bi-tools"></i></div>
@@ -532,7 +753,7 @@
                 </div>
             </div>
 
-            <div class="row g-3">
+            <div class="row g-3 dashboard-recent">
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
@@ -540,10 +761,12 @@
                             <button class="btn btn-secondary btn-sm" onclick="showSection('rentals')"><i class="bi bi-eye"></i> Ver todos</button>
                         </div>
                         <div class="card-body p-0">
-                            <table class="table table-hover" id="recent-rentals">
-                                <thead><tr><th>Cliente</th><th>Produto</th><th>Status</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive-wrapper">
+                                <table class="table table-hover" id="recent-rentals">
+                                    <thead><tr><th>Cliente</th><th>Produto</th><th>Status</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -554,10 +777,12 @@
                             <button class="btn btn-secondary btn-sm" onclick="showSection('debts')"><i class="bi bi-eye"></i> Ver todas</button>
                         </div>
                         <div class="card-body p-0">
-                            <table class="table table-hover" id="recent-debts">
-                                <thead><tr><th>Pessoa</th><th>Valor</th><th>Status</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive-wrapper">
+                                <table class="table table-hover" id="recent-debts">
+                                    <thead><tr><th>Pessoa</th><th>Valor</th><th>Status</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -577,10 +802,12 @@
             </div>
             <div class="card">
                 <div class="card-body p-0">
-                    <table class="table table-hover" id="products-table">
-                        <thead><tr><th>Nome</th><th>Quantidade</th><th>Valor Diária</th><th>Valor Total Estoque</th><th>Ações</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
+                    <div class="table-responsive-wrapper">
+                        <table class="table table-hover" id="products-table">
+                            <thead><tr><th>Nome</th><th>Qtd.</th><th>Diária</th><th>Total Estoque</th><th>Ações</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -598,10 +825,12 @@
             </div>
             <div class="card">
                 <div class="card-body p-0">
-                    <table class="table table-hover" id="rentals-table">
-                        <thead><tr><th>Cliente</th><th>Produto</th><th>Data</th><th>Dias</th><th>Total</th><th>Pagamento</th><th>Status</th><th>Ações</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
+                    <div class="table-responsive-wrapper">
+                        <table class="table table-hover" id="rentals-table">
+                            <thead><tr><th>Cliente</th><th>Produto</th><th>Data</th><th>Dias</th><th>Total</th><th>Pgto.</th><th>Status</th><th>Ações</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -616,10 +845,12 @@
             </div>
             <div class="card">
                 <div class="card-body p-0">
-                    <table class="table table-hover" id="active-rentals">
-                        <thead><tr><th>Cliente</th><th>Produto</th><th>Data Aluguel</th><th>Dias</th><th>Total</th><th>Pagamento</th><th>Ação</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
+                    <div class="table-responsive-wrapper">
+                        <table class="table table-hover" id="active-rentals">
+                            <thead><tr><th>Cliente</th><th>Produto</th><th>Data</th><th>Dias</th><th>Total</th><th>Pgto.</th><th>Ação</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -637,10 +868,12 @@
             </div>
             <div class="card">
                 <div class="card-body p-0">
-                    <table class="table table-hover" id="debts-table">
-                        <thead><tr><th>Pessoa</th><th>Descrição</th><th>Data</th><th>Total</th><th>Pago</th><th>Status</th><th>Ações</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
+                    <div class="table-responsive-wrapper">
+                        <table class="table table-hover" id="debts-table">
+                            <thead><tr><th>Pessoa</th><th>Descrição</th><th>Data</th><th>Total</th><th>Pago</th><th>Status</th><th>Ações</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -657,7 +890,7 @@
                 </button>
             </div>
 
-            <div class="row g-3 mb-4">
+            <div class="row g-3 mb-4 reports-cards">
                 <div class="col-md-3">
                     <div class="card">
                         <div class="card-body text-center py-4">
@@ -692,7 +925,7 @@
                 </div>
             </div>
 
-            <div class="row g-3">
+            <div class="row g-3 reports-charts">
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header"><span class="card-header-title"><i class="bi bi-cart-check"></i> Resumo de Aluguéis</span></div>
@@ -987,6 +1220,38 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// ── HAMBURGER MENU ──
+const sidebar      = document.getElementById('sidebar');
+const overlay      = document.getElementById('sidebar-overlay');
+const hamburgerBtn = document.getElementById('hamburger-btn');
+const sidebarClose = document.getElementById('sidebar-close');
+
+function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('visible');
+    hamburgerBtn.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('visible');
+    hamburgerBtn.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+hamburgerBtn.addEventListener('click', () => {
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+});
+
+sidebarClose.addEventListener('click', closeSidebar);
+overlay.addEventListener('click', closeSidebar);
+
+// Fechar sidebar ao navegar no mobile
+function closeSidebarIfMobile() {
+    if (window.innerWidth <= 768) closeSidebar();
+}
+
 // ── DATABASE ──
 const DB = {
     products: JSON.parse(localStorage.getItem('bp_products')) || [],
@@ -1027,11 +1292,11 @@ function showSection(name) {
     });
     document.getElementById('topbar-title').textContent = titleMap[name];
     if (name === 'reports') renderReportCharts();
+    closeSidebarIfMobile();
 }
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
-    // date
     document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' });
 
     Object.keys(sectionMap).forEach(k => {
@@ -1076,7 +1341,6 @@ function refreshDashboard() {
     document.getElementById('total-rentals').textContent  = fmt(totalRev);
     document.getElementById('final-balance').textContent  = fmt(paid - paidDebts);
 
-    // Recent tables
     const recent5r = DB.rentals.slice().reverse().slice(0,5);
     const tb1 = document.querySelector('#recent-rentals tbody');
     tb1.innerHTML = recent5r.length
@@ -1227,7 +1491,6 @@ function renderDebtsTable() {
 
 // ── MODALS ──
 function setupModals() {
-    // PRODUCT
     document.getElementById('save-product').addEventListener('click', () => {
         const nome    = document.getElementById('product-name').value.trim();
         const qtd     = parseInt(document.getElementById('product-quantity').value);
@@ -1241,7 +1504,6 @@ function setupModals() {
         toast('Produto adicionado com sucesso!');
     });
 
-    // RENTAL total
     ['rental-product','rental-days','rental-quantity'].forEach(id => {
         document.getElementById(id).addEventListener('input', updateRentalTotal);
         document.getElementById(id).addEventListener('change', updateRentalTotal);
@@ -1253,7 +1515,6 @@ function setupModals() {
         updateRentalTotal();
     });
 
-    // SAVE RENTAL
     document.getElementById('save-rental').addEventListener('click', () => {
         const productName = document.getElementById('rental-product').value;
         const product = DB.products.find(p => p.nome === productName);
@@ -1277,10 +1538,8 @@ function setupModals() {
         toast('Aluguel registrado com sucesso!');
     });
 
-    // SAVE DEBT
     document.getElementById('save-debt').addEventListener('click', saveDivida);
 
-    // SAVE DEBT PAYMENT
     document.getElementById('save-payment').addEventListener('click', () => {
         const id  = +document.getElementById('payment-debt-id').value;
         const d   = DB.debts.find(x => x.id === id);
@@ -1294,7 +1553,6 @@ function setupModals() {
         }
     });
 
-    // RENTAL PAYMENT
     document.getElementById('payment-rental-full').addEventListener('change', function() {
         document.getElementById('partial-payment-container').style.display = this.checked ? 'none' : 'block';
     });
@@ -1309,7 +1567,6 @@ function setupModals() {
         }
     });
 
-    // RETURN
     document.getElementById('confirm-return').addEventListener('click', () => {
         const id = +document.getElementById('return-rental-id').value;
         const a  = DB.rentals.find(x => x.id === id);
@@ -1324,7 +1581,6 @@ function setupModals() {
         }
     });
 
-    // REPORT
     document.getElementById('generate-report').addEventListener('click', () => {
         const txt = `Relatório BetoneiraPlus - ${new Date().toLocaleDateString('pt-BR')}
 ======================================================
@@ -1346,7 +1602,6 @@ ${DB.debts.slice().reverse().slice(0,10).map(d=>`  ${d.pessoa} | ${d.descricao} 
         toast('Relatório gerado!');
     });
 
-    // DELEGATED events
     document.addEventListener('click', e => {
         if (e.target.closest('.edit-product')) {
             const id = +e.target.closest('.edit-product').dataset.id;
@@ -1530,4 +1785,3 @@ function toast(msg, type='success') {
 </script>
 </body>
 </html>
-
