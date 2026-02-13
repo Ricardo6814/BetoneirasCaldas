@@ -34,6 +34,140 @@
             margin: 0;
         }
 
+        /* ── LOGIN SCREEN ── */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a3a4a 0%, #234d61 100%);
+            padding: 20px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.4;
+        }
+
+        .login-brand-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--accent);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 30px rgba(240, 165, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-body {
+            padding: 2.5rem 2rem;
+        }
+
+        .login-body .form-label {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .login-body .form-control {
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .login-body .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(240, 165, 0, 0.1);
+        }
+
+        .login-body .form-check-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .login-body .btn-login {
+            background: var(--accent);
+            color: var(--primary);
+            border: none;
+            border-radius: 10px;
+            padding: 0.875rem;
+            font-size: 1rem;
+            font-weight: 700;
+            width: 100%;
+            transition: all 0.2s ease;
+            margin-top: 1rem;
+        }
+
+        .login-body .btn-login:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(240, 165, 0, 0.3);
+        }
+
+        .login-footer {
+            padding: 1.5rem 2rem;
+            background-color: var(--surface-2);
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        .login-footer small {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
         /* ── SIDEBAR ── */
         .sidebar {
             position: fixed;
@@ -262,7 +396,30 @@
             color: var(--text);
         }
 
-        .topbar-actions { display: flex; align-items: center; gap: 10px; }
+        .topbar-actions { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+
+        .btn-logout {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-logout:hover {
+            background: var(--border);
+            color: var(--text);
+        }
 
         .page-content { padding: 28px 32px; }
 
@@ -630,6 +787,19 @@
                 left: 16px;
                 font-size: 0.82rem;
             }
+
+            /* Login card no mobile */
+            .login-card {
+                max-width: 100%;
+            }
+
+            .login-header {
+                padding: 2rem 1.5rem 1.5rem;
+            }
+
+            .login-body {
+                padding: 2rem 1.5rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -645,10 +815,58 @@
             .stat-label {
                 font-size: 0.68rem;
             }
+
+            .login-brand-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 2rem;
+            }
+
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
+
+<!-- ═══════════════ LOGIN SCREEN ═══════════════ -->
+<div id="login-section" class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-brand-icon">
+                <i class="bi bi-hammer"></i>
+            </div>
+            <h1>Betoneira Caldas</h1>
+            <p>Sistema de Gestão de Aluguéis</p>
+        </div>
+        <div class="login-body">
+            <form id="login-form">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuário</label>
+                    <input type="text" class="form-control" id="username" placeholder="Digite seu usuário" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Senha</label>
+                    <input type="password" class="form-control" id="password" placeholder="Digite sua senha" required>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="remember-me">
+                    <label class="form-check-label" for="remember-me">Lembrar-me</label>
+                </div>
+                <button type="submit" class="btn-login">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Entrar no Sistema
+                </button>
+            </form>
+        </div>
+        <div class="login-footer">
+            <small>Sistema de demonstração - Não requer autenticação real</small>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ MAIN SYSTEM (inicialmente oculto) ═══════════════ -->
+<div id="main-system" class="hidden">
 
 <!-- ═══════════════ OVERLAY ═══════════════ -->
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
@@ -693,9 +911,9 @@
 
     <div class="sidebar-footer">
         <div class="sidebar-user">
-            <div class="user-avatar">BP</div>
+            <div class="user-avatar" id="user-avatar">AD</div>
             <div>
-                <div class="user-name">Administrador</div>
+                <div class="user-name" id="user-name-display">Administrador</div>
                 <div class="user-role">Gestão de Aluguéis</div>
             </div>
         </div>
@@ -716,6 +934,9 @@
         </div>
         <div class="topbar-actions">
             <span class="topbar-date-text" style="font-size:0.78rem; color:var(--text-muted);" id="topbar-date"></span>
+            <button class="btn-logout" id="logout-btn">
+                <i class="bi bi-box-arrow-right"></i> Sair
+            </button>
         </div>
     </header>
 
@@ -950,6 +1171,9 @@
 
     </main>
 </div>
+
+</div>
+<!-- END MAIN SYSTEM -->
 
 <!-- ═══════════════ MODALS ═══════════════ -->
 
@@ -1220,6 +1444,65 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// ── LOGIN SYSTEM ──
+let currentUser = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Verificar se o usuário já está logado
+    const loggedInUser = localStorage.getItem('bp_user');
+    if (loggedInUser) {
+        currentUser = loggedInUser;
+        showMainSystem();
+    } else {
+        // Configurar o formulário de login
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Verificação simples de login (para demonstração)
+            if (username && password) {
+                currentUser = username;
+                localStorage.setItem('bp_user', username);
+                showMainSystem();
+            } else {
+                toast('Por favor, preencha todos os campos!', 'danger');
+            }
+        });
+    }
+    
+    // Configurar botão de logout
+    document.getElementById('logout-btn').addEventListener('click', function() {
+        localStorage.removeItem('bp_user');
+        location.reload();
+    });
+});
+
+function showMainSystem() {
+    document.getElementById('login-section').classList.add('hidden');
+    document.getElementById('main-system').classList.remove('hidden');
+    
+    // Atualizar nome do usuário
+    const initials = currentUser.substring(0, 2).toUpperCase();
+    document.getElementById('user-avatar').textContent = initials;
+    document.getElementById('user-name-display').textContent = currentUser;
+    
+    // Inicializar dados
+    document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' });
+
+    Object.keys(sectionMap).forEach(k => {
+        document.getElementById(k + '-link').addEventListener('click', e => {
+            e.preventDefault();
+            showSection(k);
+            if (k === 'dashboard') refreshDashboard();
+        });
+    });
+
+    setupModals();
+    loadAll();
+    showSection('dashboard');
+}
+
 // ── HAMBURGER MENU ──
 const sidebar      = document.getElementById('sidebar');
 const overlay      = document.getElementById('sidebar-overlay');
@@ -1247,7 +1530,6 @@ hamburgerBtn.addEventListener('click', () => {
 sidebarClose.addEventListener('click', closeSidebar);
 overlay.addEventListener('click', closeSidebar);
 
-// Fechar sidebar ao navegar no mobile
 function closeSidebarIfMobile() {
     if (window.innerWidth <= 768) closeSidebar();
 }
@@ -1294,23 +1576,6 @@ function showSection(name) {
     if (name === 'reports') renderReportCharts();
     closeSidebarIfMobile();
 }
-
-// ── INIT ──
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' });
-
-    Object.keys(sectionMap).forEach(k => {
-        document.getElementById(k + '-link').addEventListener('click', e => {
-            e.preventDefault();
-            showSection(k);
-            if (k === 'dashboard') refreshDashboard();
-        });
-    });
-
-    setupModals();
-    loadAll();
-    showSection('dashboard');
-});
 
 function loadAll() {
     renderProductsTable();
@@ -1582,7 +1847,7 @@ function setupModals() {
     });
 
     document.getElementById('generate-report').addEventListener('click', () => {
-        const txt = `Relatório BetoneiraPlus - ${new Date().toLocaleDateString('pt-BR')}
+        const txt = `Relatório Betoneira Caldas - ${new Date().toLocaleDateString('pt-BR')}
 ======================================================
 Produtos: ${DB.products.length}
 Receita Total: ${fmt(DB.rentals.reduce((s,r)=>s+r.valorTotal,0))}
