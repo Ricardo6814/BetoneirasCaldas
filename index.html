@@ -3,1485 +3,1530 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BetoneiraPlus - Sistema de Aluguel</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <title>Betoneira Caldas - Sistema de Aluguel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
+            --primary: #1a3a4a;
+            --primary-light: #234d61;
+            --accent: #f0a500;
+            --accent-hover: #d4920a;
+            --success: #17a86e;
+            --danger: #e03c3c;
+            --warning: #f0a500;
+            --info: #3b82f6;
+            --surface: #ffffff;
+            --surface-2: #f7f8fa;
+            --border: #e5e9ed;
+            --text: #1c2b36;
+            --text-muted: #6b7f8c;
+            --sidebar-width: 260px;
         }
-        
+
+        * { box-sizing: border-box; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--surface-2);
+            color: var(--text);
+            margin: 0;
         }
-        
+
+        /* ── SIDEBAR ── */
         .sidebar {
-            background-color: var(--primary-color);
-            color: white;
-            height: 100vh;
             position: fixed;
-            padding-top: 20px;
+            top: 0; left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--primary);
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            z-index: 100;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
         }
-        
-        .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 5px;
-            border-radius: 5px;
-            padding: 10px 15px;
+
+        .sidebar-brand {
+            padding: 28px 24px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
-        
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background-color: var(--secondary-color);
-            color: white;
+
+        .sidebar-brand-icon {
+            width: 44px; height: 44px;
+            background: var(--accent);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-weight: 700;
         }
-        
-        .sidebar .nav-link i {
-            margin-right: 10px;
+
+        .sidebar-brand h5 {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin: 0 0 2px;
+            letter-spacing: -0.3px;
         }
-        
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
+
+        .sidebar-brand p {
+            color: rgba(255,255,255,0.45);
+            font-size: 0.72rem;
+            margin: 0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
-        
-        .card {
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 12px;
+            overflow-y: auto;
+        }
+
+        .sidebar-section-label {
+            color: rgba(255,255,255,0.3);
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            padding: 4px 12px 8px;
+            margin-top: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.6);
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            padding: 10px 14px;
+            margin-bottom: 2px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.18s ease;
+            text-decoration: none;
+        }
+
+        .nav-link i {
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+
+        .nav-link.active {
+            background: var(--accent);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-link.active i { color: var(--primary); }
+
+        .sidebar-footer {
+            padding: 16px 12px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .user-avatar {
+            width: 34px; height: 34px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .user-name { color: #fff; font-size: 0.82rem; font-weight: 600; }
+        .user-role { color: rgba(255,255,255,0.4); font-size: 0.7rem; }
+
+        /* ── MAIN ── */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+        .page-content { padding: 28px 32px; }
+
+        /* ── CARDS ── */
+        .card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid var(--border);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 14px 14px 0 0 !important;
+        }
+
+        .card-header-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header-title i { color: var(--accent); font-size: 1rem; }
+
+        .card-body { padding: 20px; }
+
+        /* ── STAT CARDS ── */
+        .stat-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        }
+
+        .stat-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.blue   { background: #e8f0fe; color: var(--info); }
+        .stat-icon.green  { background: #e6f7f0; color: var(--success); }
+        .stat-icon.orange { background: #fff3e0; color: var(--accent); }
+        .stat-icon.red    { background: #fdecea; color: var(--danger); }
+
+        .stat-body { flex: 1; }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--text); line-height: 1; font-family: 'DM Mono', monospace; }
+
+        /* ── BUTTONS ── */
+        .btn {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.82rem;
+            border-radius: 8px;
+            padding: 7px 16px;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             border: none;
         }
-        
-        .card-header {
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 10px 10px 0 0 !important;
+
+        .btn-primary   { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-light); color: #fff; }
+        .btn-accent    { background: var(--accent); color: var(--primary); }
+        .btn-accent:hover { background: var(--accent-hover); color: var(--primary); }
+        .btn-success   { background: var(--success); color: #fff; }
+        .btn-success:hover { background: #129960; color: #fff; }
+        .btn-danger    { background: var(--danger); color: #fff; }
+        .btn-danger:hover { background: #c42e2e; color: #fff; }
+        .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--border); color: var(--text); }
+        .btn-info      { background: var(--info); color: #fff; }
+        .btn-info:hover { background: #2563eb; color: #fff; }
+
+        /* Icon-only action buttons */
+        .btn-icon {
+            width: 32px; height: 32px;
+            padding: 0;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.82rem;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+            cursor: pointer;
         }
-        
-        .btn-primary {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
+
+        .btn-icon-edit   { background: #e8f0fe; color: var(--info); border-color: #c7d9fc; }
+        .btn-icon-edit:hover { background: var(--info); color: #fff; border-color: var(--info); }
+        .btn-icon-delete { background: #fdecea; color: var(--danger); border-color: #f9c6c6; }
+        .btn-icon-delete:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+        .btn-icon-pay    { background: #e6f7f0; color: var(--success); border-color: #b7e8d3; }
+        .btn-icon-pay:hover { background: var(--success); color: #fff; border-color: var(--success); }
+        .btn-icon-return { background: #fff3e0; color: var(--accent); border-color: #fbd99a; }
+        .btn-icon-return:hover { background: var(--accent); color: var(--primary); border-color: var(--accent); }
+
+        .action-group { display: flex; gap: 5px; align-items: center; }
+
+        /* ── TABLES ── */
+        .table { margin: 0; }
+        .table thead th {
+            background: var(--surface-2);
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
         }
-        
-        .btn-danger {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
+
+        .table tbody td {
+            padding: 12px 16px;
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
         }
-        
-        .stat-card {
-            text-align: center;
-            padding: 20px;
+
+        .table tbody tr:last-child td { border-bottom: none; }
+        .table-hover tbody tr:hover td { background: var(--surface-2); }
+
+        /* ── BADGES ── */
+        .badge {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-paid     { background: #e6f7f0; color: #0d8a56; }
+        .badge-unpaid   { background: #fdecea; color: #c42e2e; }
+        .badge-returned { background: #e6f7f0; color: #0d8a56; }
+        .badge-rented   { background: #fff3e0; color: #c47800; }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .page-header-left h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 0 0 2px;
+        }
+
+        .page-header-left p {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            margin: 0;
+        }
+
+        /* ── MODALS ── */
+        .modal-content { border-radius: 16px; border: 1px solid var(--border); }
+        .modal-header {
+            background: var(--primary);
+            color: #fff;
+            border-radius: 16px 16px 0 0;
+            padding: 18px 24px;
+            border-bottom: none;
+        }
+        .modal-title { font-size: 0.95rem; font-weight: 600; }
+        .modal-body { padding: 24px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); }
+
+        .form-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .form-control, .form-select {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            padding: 9px 12px;
+            font-family: 'DM Sans', sans-serif;
+            transition: border 0.15s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(240,165,0,0.15);
+        }
+
+        .value-highlight {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
             border-radius: 10px;
-            color: white;
-            margin-bottom: 20px;
-        }
-        
-        .stat-card.blue {
-            background-color: var(--secondary-color);
-        }
-        
-        .stat-card.green {
-            background-color: #27ae60;
-        }
-        
-        .stat-card.red {
-            background-color: var(--accent-color);
-        }
-        
-        .stat-card .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-        }
-        
-        .table-responsive {
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .table th {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .badge-paid {
-            background-color: #27ae60;
-        }
-        
-        .badge-unpaid {
-            background-color: #e74c3c;
-        }
-        
-        .badge-returned {
-            background-color: #27ae60;
-        }
-        
-        .badge-rented {
-            background-color: #f39c12;
-        }
-        
-        .logo {
+            padding: 14px 16px;
             text-align: center;
-            margin-bottom: 30px;
-            padding: 0 15px;
         }
-        
-        .logo img {
-            max-width: 80%;
-            margin-bottom: 10px;
+        .value-highlight span { font-size: 1.4rem; font-weight: 700; color: var(--success); font-family: 'DM Mono', monospace; }
+        .value-highlight p { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 2px 0 0; font-weight: 600; }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            padding: 48px 24px;
+            text-align: center;
+            color: var(--text-muted);
         }
-        
-        .logo h4 {
-            color: white;
-            font-weight: bold;
+        .empty-state i { font-size: 2.5rem; opacity: 0.3; margin-bottom: 12px; display: block; }
+        .empty-state p { font-size: 0.875rem; margin: 0; }
+
+        /* ── TOAST ── */
+        .toast-custom {
+            position: fixed;
+            bottom: 24px; right: 24px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            animation: slideUp 0.3s ease;
+        }
+        .toast-custom.success::before { content: '✓'; background: var(--success); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
+        .toast-custom.danger { background: var(--danger); }
+
+        @keyframes slideUp {
+            from { transform: translateY(12px); opacity: 0; }
+            to   { transform: translateY(0); opacity: 1; }
         }
 
-        /* Toast styles */
-        .toast {
-            transition: opacity 0.3s ease;
-        }
-
-        .toast.show {
-            opacity: 1;
-        }
-
-        .toast:not(.show) {
-            opacity: 0;
-        }
-        
+        /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
+            .sidebar { transform: translateX(-100%); }
+            .main-wrapper { margin-left: 0; }
         }
+
+        /* Sections hidden */
+        .section-hidden { display: none; }
     </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 d-md-block sidebar">
-                <div class="logo">
-                    <h4><i class="bi bi-building"></i> BetoneiraPlus</h4>
-                    <p class="text-muted">Sistema de Aluguel</p>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="sidebar-brand-icon"><i class="bi bi-hammer"></i></div>
+        <h5>Betoneira Cal</h5>
+        <p>Sistema de Aluguel</p>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Principal</div>
+        <a class="nav-link active" href="#" id="dashboard-link">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a class="nav-link" href="#" id="products-link">
+            <i class="bi bi-tools"></i> Produtos
+        </a>
+
+        <div class="sidebar-section-label" style="margin-top:12px;">Operações</div>
+        <a class="nav-link" href="#" id="rentals-link">
+            <i class="bi bi-cart-check"></i> Aluguéis
+        </a>
+        <a class="nav-link" href="#" id="returns-link">
+            <i class="bi bi-arrow-return-left"></i> Devoluções
+        </a>
+        <a class="nav-link" href="#" id="debts-link">
+            <i class="bi bi-credit-card"></i> Dívidas
+        </a>
+
+        <div class="sidebar-section-label" style="margin-top:12px;">Análise</div>
+        <a class="nav-link" href="#" id="reports-link">
+            <i class="bi bi-graph-up"></i> Relatórios
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="sidebar-user">
+            <div class="user-avatar">BP</div>
+            <div>
+                <div class="user-name">Administrador</div>
+                <div class="user-role">Gestão de Aluguéis</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main-wrapper">
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <span class="topbar-title" id="topbar-title">Dashboard</span>
+        <div class="topbar-actions">
+            <span style="font-size:0.78rem; color:var(--text-muted);" id="topbar-date"></span>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <!-- ── DASHBOARD ── -->
+        <div id="dashboard-section">
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="bi bi-tools"></i></div>
+                        <div class="stat-body">
+                            <div class="stat-label">Total de Produtos</div>
+                            <div class="stat-value" id="total-products">0</div>
+                        </div>
+                    </div>
                 </div>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#" id="dashboard-link">
-                            <i class="bi bi-speedometer2"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="products-link">
-                            <i class="bi bi-tools"></i> Produtos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="rentals-link">
-                            <i class="bi bi-cart-check"></i> Aluguéis
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="returns-link">
-                            <i class="bi bi-arrow-return-left"></i> Devoluções
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="debts-link">
-                            <i class="bi bi-credit-card"></i> Dívidas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="reports-link">
-                            <i class="bi bi-graph-up"></i> Relatórios
-                        </a>
-                    </li>
-                </ul>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="bi bi-cash-coin"></i></div>
+                        <div class="stat-body">
+                            <div class="stat-label">Receita Total</div>
+                            <div class="stat-value" id="total-revenue" style="font-size:1.15rem;">R$ 0,00</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="bi bi-credit-card"></i></div>
+                        <div class="stat-body">
+                            <div class="stat-label">Total de Dívidas</div>
+                            <div class="stat-value" id="total-debts" style="font-size:1.15rem;">R$ 0,00</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Main Content -->
-            <div class="col-md-9 col-lg-10 main-content">
-                <!-- Dashboard Section -->
-                <div id="dashboard-section">
-                    <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
-                    <hr>
-                    
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="stat-card blue">
-                                <i class="bi bi-tools" style="font-size: 2rem;"></i>
-                                <h4>Produtos</h4>
-                                <div class="stat-value" id="total-products">0</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-card green">
-                                <i class="bi bi-cash-coin" style="font-size: 2rem;"></i>
-                                <h4>Receita Total</h4>
-                                <div class="stat-value" id="total-revenue">R$ 0,00</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stat-card red">
-                                <i class="bi bi-credit-card" style="font-size: 2rem;"></i>
-                                <h4>Dívidas</h4>
-                                <div class="stat-value" id="total-debts">R$ 0,00</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5><i class="bi bi-cart-check"></i> Aluguéis Recentes</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover" id="recent-rentals">
-                                            <thead>
-                                                <tr>
-                                                    <th>Cliente</th>
-                                                    <th>Produto</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <!-- Dinamic content -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5><i class="bi bi-credit-card"></i> Dívidas Recentes</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover" id="recent-debts">
-                                            <thead>
-                                                <tr>
-                                                    <th>Pessoa</th>
-                                                    <th>Valor</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <!-- Dinamic content -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Products Section -->
-                <div id="products-section" style="display: none;">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2><i class="bi bi-tools"></i> Gerenciamento de Produtos</h2>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                            <i class="bi bi-plus-circle"></i> Adicionar Produto
-                        </button>
-                    </div>
-                    <hr>
-                    
+            <div class="row g-3">
+                <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h5>Lista de Produtos</h5>
+                            <span class="card-header-title"><i class="bi bi-cart-check"></i> Aluguéis Recentes</span>
+                            <button class="btn btn-secondary btn-sm" onclick="showSection('rentals')"><i class="bi bi-eye"></i> Ver todos</button>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover" id="products-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Nome</th>
-                                            <th>Quantidade</th>
-                                            <th>Valor Diária</th>
-                                            <th>Valor Total Estoque</th>
-                                            <th>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Dinamic content -->
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="card-body p-0">
+                            <table class="table table-hover" id="recent-rentals">
+                                <thead><tr><th>Cliente</th><th>Produto</th><th>Status</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-
-                <!-- Rentals Section -->
-                <div id="rentals-section" style="display: none;">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2><i class="bi bi-cart-check"></i> Gerenciamento de Aluguéis</h2>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRentalModal">
-                            <i class="bi bi-plus-circle"></i> Novo Aluguel
-                        </button>
-                    </div>
-                    <hr>
-                    
+                <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h5>Histórico de Aluguéis</h5>
+                            <span class="card-header-title"><i class="bi bi-credit-card"></i> Dívidas Recentes</span>
+                            <button class="btn btn-secondary btn-sm" onclick="showSection('debts')"><i class="bi bi-eye"></i> Ver todas</button>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover" id="rentals-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Cliente</th>
-                                            <th>Produto</th>
-                                            <th>Data</th>
-                                            <th>Dias</th>
-                                            <th>Valor Total</th>
-                                            <th>Pagamento</th>
-                                            <th>Status</th>
-                                            <th>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Dinamic content -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Returns Section -->
-                <div id="returns-section" style="display: none;">
-                    <h2><i class="bi bi-arrow-return-left"></i> Registrar Devolução</h2>
-                    <hr>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Aluguéis Ativos</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover" id="active-rentals">
-                                    <thead>
-                                        <tr>
-                                            <th>Cliente</th>
-                                            <th>Produto</th>
-                                            <th>Data Aluguel</th>
-                                            <th>Dias</th>
-                                            <th>Valor Total</th>
-                                            <th>Pagamento</th>
-                                            <th>Ação</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Dinamic content -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Debts Section -->
-                <div id="debts-section" style="display: none;">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2><i class="bi bi-credit-card"></i> Gerenciamento de Dívidas</h2>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDebtModal">
-                            <i class="bi bi-plus-circle"></i> Nova Dívida
-                        </button>
-                    </div>
-                    <hr>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Lista de Dívidas</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover" id="debts-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Pessoa</th>
-                                            <th>Descrição</th>
-                                            <th>Data</th>
-                                            <th>Valor Total</th>
-                                            <th>Valor Pago</th>
-                                            <th>Status</th>
-                                            <th>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Dinamic content -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Reports Section -->
-                <div id="reports-section" style="display: none;">
-                    <h2><i class="bi bi-graph-up"></i> Relatórios Financeiros</h2>
-                    <hr>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Resumo de Aluguéis</h5>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="rentalsChart" height="200"></canvas>
-                                    <div class="mt-3">
-                                        <p><strong>Total de Aluguéis:</strong> <span id="total-rentals">R$ 0,00</span></p>
-                                        <p><strong>Recebidos:</strong> <span id="paid-rentals">R$ 0,00</span></p>
-                                        <p><strong>Em Aberto:</strong> <span id="unpaid-rentals">R$ 0,00</span></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Resumo de Dívidas</h5>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="debtsChart" height="200"></canvas>
-                                    <div class="mt-3">
-                                        <p><strong>Total de Dívidas:</strong> <span id="total-debts-report">R$ 0,00</span></p>
-                                        <p><strong>Pagas:</strong> <span id="paid-debts">R$ 0,00</span></p>
-                                        <p><strong>Em Aberto:</strong> <span id="unpaid-debts">R$ 0,00</span></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h5>Saldo Financeiro</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="alert alert-success">
-                                <h4><i class="bi bi-cash-stack"></i> Saldo Final: <span id="final-balance">R$ 0,00</span></h4>
-                            </div>
-                            <button class="btn btn-primary" id="generate-report">
-                                <i class="bi bi-file-earmark-text"></i> Gerar Relatório Completo
-                            </button>
+                        <div class="card-body p-0">
+                            <table class="table table-hover" id="recent-debts">
+                                <thead><tr><th>Pessoa</th><th>Valor</th><th>Status</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Add Product Modal -->
-    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addProductModalLabel"><i class="bi bi-plus-circle"></i> Adicionar Produto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- ── PRODUCTS ── -->
+        <div id="products-section" class="section-hidden">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h2>Produtos</h2>
+                    <p>Gerencie seu inventário de equipamentos</p>
                 </div>
-                <div class="modal-body">
-                    <form id="product-form">
-                        <div class="mb-3">
-                            <label for="product-name" class="form-label">Nome do Produto</label>
-                            <input type="text" class="form-control" id="product-name" required>
+                <button class="btn btn-accent" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="bi bi-plus-circle"></i> Novo Produto
+                </button>
+            </div>
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-hover" id="products-table">
+                        <thead><tr><th>Nome</th><th>Quantidade</th><th>Valor Diária</th><th>Valor Total Estoque</th><th>Ações</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── RENTALS ── -->
+        <div id="rentals-section" class="section-hidden">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h2>Aluguéis</h2>
+                    <p>Histórico completo de locações</p>
+                </div>
+                <button class="btn btn-accent" data-bs-toggle="modal" data-bs-target="#addRentalModal">
+                    <i class="bi bi-plus-circle"></i> Novo Aluguel
+                </button>
+            </div>
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-hover" id="rentals-table">
+                        <thead><tr><th>Cliente</th><th>Produto</th><th>Data</th><th>Dias</th><th>Total</th><th>Pagamento</th><th>Status</th><th>Ações</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── RETURNS ── -->
+        <div id="returns-section" class="section-hidden">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h2>Devoluções</h2>
+                    <p>Aluguéis ativos aguardando devolução</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-hover" id="active-rentals">
+                        <thead><tr><th>Cliente</th><th>Produto</th><th>Data Aluguel</th><th>Dias</th><th>Total</th><th>Pagamento</th><th>Ação</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── DEBTS ── -->
+        <div id="debts-section" class="section-hidden">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h2>Dívidas</h2>
+                    <p>Controle de recebimentos e pendências</p>
+                </div>
+                <button class="btn btn-accent" data-bs-toggle="modal" data-bs-target="#addDebtModal">
+                    <i class="bi bi-plus-circle"></i> Nova Dívida
+                </button>
+            </div>
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-hover" id="debts-table">
+                        <thead><tr><th>Pessoa</th><th>Descrição</th><th>Data</th><th>Total</th><th>Pago</th><th>Status</th><th>Ações</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── REPORTS ── -->
+        <div id="reports-section" class="section-hidden">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h2>Relatórios Financeiros</h2>
+                    <p>Visão consolidada das operações</p>
+                </div>
+                <button class="btn btn-accent" id="generate-report">
+                    <i class="bi bi-file-earmark-arrow-down"></i> Gerar Relatório
+                </button>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center py-4">
+                            <div style="color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Total Aluguéis</div>
+                            <div style="font-size:1.4rem;font-weight:700;font-family:'DM Mono';color:var(--primary);" id="total-rentals">R$ 0,00</div>
                         </div>
-                        <div class="mb-3">
-                            <label for="product-quantity" class="form-label">Quantidade Disponível</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center py-4">
+                            <div style="color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Recebidos</div>
+                            <div style="font-size:1.4rem;font-weight:700;font-family:'DM Mono';color:var(--success);" id="paid-rentals">R$ 0,00</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center py-4">
+                            <div style="color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Em Aberto</div>
+                            <div style="font-size:1.4rem;font-weight:700;font-family:'DM Mono';color:var(--danger);" id="unpaid-rentals">R$ 0,00</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card" style="border-color:var(--success);background:linear-gradient(135deg,#e6f7f0,#fff);">
+                        <div class="card-body text-center py-4">
+                            <div style="color:var(--success);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Saldo Final</div>
+                            <div style="font-size:1.4rem;font-weight:700;font-family:'DM Mono';color:var(--success);" id="final-balance">R$ 0,00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header"><span class="card-header-title"><i class="bi bi-cart-check"></i> Resumo de Aluguéis</span></div>
+                        <div class="card-body"><canvas id="rentalsChart" height="220"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header"><span class="card-header-title"><i class="bi bi-credit-card"></i> Resumo de Dívidas</span></div>
+                        <div class="card-body">
+                            <canvas id="debtsChart" height="220"></canvas>
+                            <div class="mt-3" style="font-size:0.82rem;color:var(--text-muted);">
+                                <div class="d-flex justify-content-between mb-1"><span>Total de Dívidas</span><strong id="total-debts-report">R$ 0,00</strong></div>
+                                <div class="d-flex justify-content-between mb-1"><span>Pagas</span><strong id="paid-debts" style="color:var(--success);">R$ 0,00</strong></div>
+                                <div class="d-flex justify-content-between"><span>Em Aberto</span><strong id="unpaid-debts" style="color:var(--danger);">R$ 0,00</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- Add Product -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-tools me-2"></i>Adicionar Produto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="product-form">
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Produto</label>
+                        <input type="text" class="form-control" id="product-name" placeholder="Ex: Betoneira 400L" required>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label">Quantidade Disponível</label>
                             <input type="number" class="form-control" id="product-quantity" min="0" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="product-daily-rate" class="form-label">Valor da Diária (R$)</label>
+                        <div class="col-6">
+                            <label class="form-label">Valor da Diária (R$)</label>
                             <input type="number" step="0.01" class="form-control" id="product-daily-rate" min="0" required>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="save-product">Salvar</button>
-                </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" id="save-product"><i class="bi bi-check2"></i> Salvar</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Add Rental Modal -->
-    <div class="modal fade" id="addRentalModal" tabindex="-1" aria-labelledby="addRentalModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addRentalModalLabel"><i class="bi bi-cart-plus"></i> Novo Aluguel</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="rental-form">
-                        <div class="mb-3">
-                            <label for="rental-client" class="form-label">Cliente</label>
-                            <input type="text" class="form-control" id="rental-client" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="rental-product" class="form-label">Produto</label>
-                            <select class="form-select" id="rental-product" required>
-                                <option value="">Selecione um produto</option>
-                                <!-- Dinamic content -->
-                            </select>
-                            <div class="form-text" id="product-info">Disponível: 0 | Diária: R$ 0,00</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="rental-days" class="form-label">Dias de Aluguel</label>
+<!-- Add Rental -->
+<div class="modal fade" id="addRentalModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-cart-plus me-2"></i>Novo Aluguel</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="rental-form">
+                    <div class="mb-3">
+                        <label class="form-label">Cliente</label>
+                        <input type="text" class="form-control" id="rental-client" placeholder="Nome do cliente" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Produto</label>
+                        <select class="form-select" id="rental-product" required>
+                            <option value="">Selecione um produto</option>
+                        </select>
+                        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:5px;" id="product-info">Disponível: — | Diária: —</div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Dias de Aluguel</label>
                             <input type="number" class="form-control" id="rental-days" min="1" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="rental-quantity" class="form-label">Quantidade</label>
+                        <div class="col-6">
+                            <label class="form-label">Quantidade</label>
                             <input type="number" class="form-control" id="rental-quantity" min="1" required>
                         </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="rental-paid">
-                            <label class="form-check-label" for="rental-paid">Pagamento realizado</label>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rental-paid">
+                            <label class="form-check-label" for="rental-paid" style="font-size:0.875rem;">Pagamento já realizado</label>
                         </div>
-                        <div class="alert alert-info">
-                            <strong>Valor Total:</strong> <span id="rental-total">R$ 0,00</span>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="save-rental">Registrar Aluguel</button>
-                </div>
+                    </div>
+                    <div class="value-highlight">
+                        <span id="rental-total">R$ 0,00</span>
+                        <p>Valor Total do Aluguel</p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" id="save-rental"><i class="bi bi-check2"></i> Registrar</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Add Debt Modal -->
-    <div class="modal fade" id="addDebtModal" tabindex="-1" aria-labelledby="addDebtModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addDebtModalLabel"><i class="bi bi-credit-card"></i> Nova Dívida</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="debt-form">
-                        <div class="mb-3">
-                            <label for="debt-person" class="form-label">Pessoa</label>
+<!-- Add Debt -->
+<div class="modal fade" id="addDebtModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addDebtModalLabel"><i class="bi bi-credit-card me-2"></i>Nova Dívida</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="debt-form">
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Pessoa</label>
                             <input type="text" class="form-control" id="debt-person" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="debt-description" class="form-label">Descrição</label>
-                            <input type="text" class="form-control" id="debt-description" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="debt-total" class="form-label">Valor Total (R$)</label>
-                            <input type="number" step="0.01" class="form-control" id="debt-total" min="0" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="debt-paid" class="form-label">Valor Pago (R$)</label>
-                            <input type="number" step="0.01" class="form-control" id="debt-paid" min="0" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="debt-date" class="form-label">Data</label>
+                        <div class="col-6">
+                            <label class="form-label">Data</label>
                             <input type="date" class="form-control" id="debt-date" required>
                         </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="debt-is-paid">
-                            <label class="form-check-label" for="debt-is-paid">Dívida quitada</label>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="save-debt">Salvar Dívida</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Payment Modal -->
-    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="paymentModalLabel"><i class="bi bi-cash"></i> Registrar Pagamento</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="payment-form">
-                        <input type="hidden" id="payment-debt-id">
-                        <div class="mb-3">
-                            <label for="payment-person" class="form-label">Pessoa</label>
-                            <input type="text" class="form-control" id="payment-person" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="payment-description" class="form-label">Descrição</label>
-                            <input type="text" class="form-control" id="payment-description" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="payment-total" class="form-label">Valor Total (R$)</label>
-                            <input type="text" class="form-control" id="payment-total" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="payment-already-paid" class="form-label">Valor Já Pago (R$)</label>
-                            <input type="text" class="form-control" id="payment-already-paid" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="payment-amount" class="form-label">Valor do Pagamento (R$)</label>
-                            <input type="number" step="0.01" class="form-control" id="payment-amount" min="0" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="save-payment">Registrar Pagamento</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Payment Rental Modal -->
-    <div class="modal fade" id="paymentRentalModal" tabindex="-1" aria-labelledby="paymentRentalModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="paymentRentalModalLabel"><i class="bi bi-cash"></i> Registrar Pagamento de Aluguel</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="payment-rental-form">
-                        <input type="hidden" id="payment-rental-id">
-                        <div class="mb-3">
-                            <label for="payment-rental-client" class="form-label">Cliente</label>
-                            <input type="text" class="form-control" id="payment-rental-client" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="payment-rental-product" class="form-label">Produto</label>
-                            <input type="text" class="form-control" id="payment-rental-product" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="payment-rental-total" class="form-label">Valor Total (R$)</label>
-                            <input type="text" class="form-control" id="payment-rental-total" readonly>
-                        </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="payment-rental-full">
-                            <label class="form-check-label" for="payment-rental-full">Pagamento total</label>
-                        </div>
-                        <div class="mb-3" id="partial-payment-container" style="display: none;">
-                            <label for="payment-rental-amount" class="form-label">Valor do Pagamento (R$)</label>
-                            <input type="number" step="0.01" class="form-control" id="payment-rental-amount" min="0">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="save-rental-payment">Registrar Pagamento</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Return Modal -->
-    <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="returnModalLabel"><i class="bi bi-arrow-return-left"></i> Registrar Devolução</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="return-form">
-                        <input type="hidden" id="return-rental-id">
-                        <div class="mb-3">
-                            <label for="return-client" class="form-label">Cliente</label>
-                            <input type="text" class="form-control" id="return-client" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="return-product" class="form-label">Produto</label>
-                            <input type="text" class="form-control" id="return-product" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="return-date" class="form-label">Data do Aluguel</label>
-                            <input type="text" class="form-control" id="return-date" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="return-days" class="form-label">Dias Alugados</label>
-                            <input type="text" class="form-control" id="return-days" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="return-total" class="form-label">Valor Total</label>
-                            <input type="text" class="form-control" id="return-total" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="return-payment" class="form-label">Status do Pagamento</label>
-                            <input type="text" class="form-control" id="return-payment" readonly>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="confirm-return">Confirmar Devolução</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Banco de dados local usando localStorage
-        const DB = {
-            products: JSON.parse(localStorage.getItem('products')) || [],
-            rentals: JSON.parse(localStorage.getItem('rentals')) || [],
-            debts: JSON.parse(localStorage.getItem('debts')) || [],
-            
-            save: function() {
-                localStorage.setItem('products', JSON.stringify(this.products));
-                localStorage.setItem('rentals', JSON.stringify(this.rentals));
-                localStorage.setItem('debts', JSON.stringify(this.debts));
-                console.log('Dados salvos no localStorage');
-            },
-            
-            // Métodos para gerar IDs únicos
-            nextProductId: function() {
-                return this.products.length > 0 ? Math.max(...this.products.map(p => p.id)) + 1 : 1;
-            },
-            nextRentalId: function() {
-                return this.rentals.length > 0 ? Math.max(...this.rentals.map(r => r.id)) + 1 : 1;
-            },
-            nextDebtId: function() {
-                return this.debts.length > 0 ? Math.max(...this.debts.map(d => d.id)) + 1 : 1;
-            }
-        };
-
-        // Elementos da interface
-        const sections = {
-            dashboard: document.getElementById('dashboard-section'),
-            products: document.getElementById('products-section'),
-            rentals: document.getElementById('rentals-section'),
-            returns: document.getElementById('returns-section'),
-            debts: document.getElementById('debts-section'),
-            reports: document.getElementById('reports-section')
-        };
-        
-        const navLinks = {
-            dashboard: document.getElementById('dashboard-link'),
-            products: document.getElementById('products-link'),
-            rentals: document.getElementById('rentals-link'),
-            returns: document.getElementById('returns-link'),
-            debts: document.getElementById('debts-link'),
-            reports: document.getElementById('reports-link')
-        };
-
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', function() {
-            setupNavigation();
-            setupModals();
-            showSection('dashboard');
-            loadData();
-        });
-
-        // Configuração da navegação
-        function setupNavigation() {
-            for (const [sectionName, link] of Object.entries(navLinks)) {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    showSection(sectionName);
-                    if (sectionName === 'dashboard') refreshDashboard();
-                });
-            }
-        }
-
-        // Mostra uma seção específica
-        function showSection(sectionName) {
-            for (const section of Object.values(sections)) {
-                section.style.display = 'none';
-            }
-            
-            for (const link of Object.values(navLinks)) {
-                link.classList.remove('active');
-            }
-            
-            sections[sectionName].style.display = 'block';
-            navLinks[sectionName].classList.add('active');
-        }
-
-        // Carrega todos os dados iniciais
-        function loadData() {
-            updateProductsTable(DB.products);
-            updateProductDropdown(DB.products);
-            updateRentalsTable(DB.rentals);
-            updateActiveRentalsTable(DB.rentals.filter(r => !r.devolvido));
-            updateDebtsTable(DB.debts);
-            refreshDashboard();
-        }
-
-        // Atualiza o dashboard
-        function refreshDashboard() {
-            // Total de produtos
-            document.getElementById('total-products').textContent = DB.products.length;
-            
-            // Receita de aluguéis
-            const totalRevenue = DB.rentals.reduce((sum, r) => sum + r.valorTotal, 0);
-            const recebidos = DB.rentals.filter(a => a.pago).reduce((sum, r) => sum + r.valorTotal, 0);
-            
-            document.getElementById('total-revenue').textContent = formatCurrency(totalRevenue);
-            document.getElementById('paid-rentals').textContent = formatCurrency(recebidos);
-            document.getElementById('unpaid-rentals').textContent = formatCurrency(totalRevenue - recebidos);
-            
-            // Tabela de aluguéis recentes
-            const recentRentals = DB.rentals.slice().reverse().slice(0, 5);
-            updateRecentTable('recent-rentals', recentRentals, r => [
-                r.cliente, 
-                r.produto,
-                `<span class="badge ${r.pago ? 'bg-success' : 'bg-warning'}">${r.pago ? 'Pago' : 'Aberto'}</span>`
-            ]);
-            
-            // Dívidas
-            const totalDebts = DB.debts.reduce((sum, d) => sum + d.valorTotal, 0);
-            const totalPaid = DB.debts.reduce((sum, d) => sum + d.valorPago, 0);
-            
-            document.getElementById('total-debts').textContent = formatCurrency(totalDebts);
-            document.getElementById('total-debts-report').textContent = formatCurrency(totalDebts);
-            document.getElementById('paid-debts').textContent = formatCurrency(totalPaid);
-            document.getElementById('unpaid-debts').textContent = formatCurrency(totalDebts - totalPaid);
-            
-            // Tabela de dívidas recentes
-            const recentDebts = DB.debts.slice().reverse().slice(0, 5);
-            updateRecentTable('recent-debts', recentDebts, d => [
-                d.pessoa, 
-                formatCurrency(d.valorTotal),
-                `<span class="badge ${d.pago ? 'bg-success' : 'bg-danger'}">${d.pago ? 'Pago' : 'Aberto'}</span>`
-            ]);
-            
-            // Saldo final
-            const saldo = recebidos - totalPaid;
-            document.getElementById('final-balance').textContent = formatCurrency(saldo);
-        }
-
-        // Atualiza uma tabela de dados recentes
-        function updateRecentTable(tableId, items, rowMapper) {
-            const table = document.getElementById(tableId).querySelector('tbody');
-            table.innerHTML = '';
-            
-            for (const item of items) {
-                const row = document.createElement('tr');
-                row.innerHTML = rowMapper(item).map(cell => `<td>${cell}</td>`).join('');
-                table.appendChild(row);
-            }
-        }
-
-        // Configura os modais e seus eventos
-        function setupModals() {
-            // Modal de produto
-            document.getElementById('save-product').addEventListener('click', function() {
-                const produto = {
-                    id: DB.nextProductId(),
-                    nome: document.getElementById('product-name').value,
-                    quantidadeDisponivel: parseInt(document.getElementById('product-quantity').value),
-                    valorDiaria: parseFloat(document.getElementById('product-daily-rate').value)
-                };
-                
-                DB.products.push(produto);
-                DB.save();
-                
-                loadData();
-                bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
-                document.getElementById('product-form').reset();
-                showToast('Produto adicionado com sucesso!');
-            });
-            
-            // Modal de aluguel
-            document.getElementById('rental-product').addEventListener('change', function() {
-                const productName = this.value;
-                if (!productName) return;
-                
-                const produto = DB.products.find(p => p.nome === productName);
-                if (produto) {
-                    document.getElementById('product-info').textContent = 
-                        `Disponível: ${produto.quantidadeDisponivel} | Diária: ${formatCurrency(produto.valorDiaria)}`;
-                    updateRentalTotal();
-                }
-            });
-            
-            document.getElementById('rental-days').addEventListener('input', updateRentalTotal);
-            document.getElementById('rental-quantity').addEventListener('input', updateRentalTotal);
-            
-            document.getElementById('save-rental').addEventListener('click', function() {
-                const productName = document.getElementById('rental-product').value;
-                const product = DB.products.find(p => p.nome === productName);
-                
-                if (!product) {
-                    showToast('Produto não encontrado!', 'danger');
-                    return;
-                }
-                
-                if (product.quantidadeDisponivel < parseInt(document.getElementById('rental-quantity').value)) {
-                    showToast('Quantidade indisponível!', 'danger');
-                    return;
-                }
-                
-                const aluguel = {
-                    id: DB.nextRentalId(),
-                    cliente: document.getElementById('rental-client').value,
-                    produto: productName,
-                    dias: parseInt(document.getElementById('rental-days').value),
-                    quantidade: parseInt(document.getElementById('rental-quantity').value),
-                    valorDiaria: product.valorDiaria,
-                    valorTotal: product.valorDiaria * parseInt(document.getElementById('rental-days').value) * parseInt(document.getElementById('rental-quantity').value),
-                    pago: document.getElementById('rental-paid').checked,
-                    data: new Date().toISOString(),
-                    devolvido: false
-                };
-                
-                // Atualizar quantidade disponível
-                product.quantidadeDisponivel -= aluguel.quantidade;
-                
-                DB.rentals.push(aluguel);
-                DB.save();
-                
-                loadData();
-                bootstrap.Modal.getInstance(document.getElementById('addRentalModal')).hide();
-                document.getElementById('rental-form').reset();
-                showToast('Aluguel registrado com sucesso!');
-            });
-            
-            // Modal de dívida
-            document.getElementById('save-debt').addEventListener('click', function() {
-                const divida = {
-                    id: DB.nextDebtId(),
-                    pessoa: document.getElementById('debt-person').value,
-                    descricao: document.getElementById('debt-description').value,
-                    valorTotal: parseFloat(document.getElementById('debt-total').value),
-                    valorPago: parseFloat(document.getElementById('debt-paid').value),
-                    data: document.getElementById('debt-date').value || new Date().toISOString(),
-                    pago: document.getElementById('debt-is-paid').checked
-                };
-                
-                DB.debts.push(divida);
-                DB.save();
-                
-                loadData();
-                bootstrap.Modal.getInstance(document.getElementById('addDebtModal')).hide();
-                document.getElementById('debt-form').reset();
-                showToast('Dívida registrada com sucesso!');
-            });
-            
-            // Modal de pagamento de dívida
-            document.getElementById('save-payment').addEventListener('click', function() {
-                const id = parseInt(document.getElementById('payment-debt-id').value);
-                const divida = DB.debts.find(d => d.id === id);
-                const valor = parseFloat(document.getElementById('payment-amount').value);
-                
-                if (divida) {
-                    divida.valorPago += valor;
-                    divida.pago = divida.valorPago >= divida.valorTotal;
-                    DB.save();
-                    loadData();
-                    bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
-                    document.getElementById('payment-form').reset();
-                    showToast('Pagamento registrado com sucesso!');
-                }
-            });
-            
-            // Modal de pagamento de aluguel
-            document.getElementById('save-rental-payment').addEventListener('click', function() {
-                const id = parseInt(document.getElementById('payment-rental-id').value);
-                const aluguel = DB.rentals.find(r => r.id === id);
-                const isFullPayment = document.getElementById('payment-rental-full').checked;
-                const amount = isFullPayment ? aluguel.valorTotal : 
-                    parseFloat(document.getElementById('payment-rental-amount').value);
-                
-                if (!isFullPayment && (!amount || amount <= 0)) {
-                    showToast('Informe um valor válido para o pagamento!', 'danger');
-                    return;
-                }
-                
-                aluguel.pago = isFullPayment;
-                DB.save();
-                loadData();
-                bootstrap.Modal.getInstance(document.getElementById('paymentRentalModal')).hide();
-                showToast(`Pagamento de ${formatCurrency(amount)} registrado com sucesso!`);
-            });
-            
-            // Modal de devolução
-            document.getElementById('confirm-return').addEventListener('click', function() {
-                const id = parseInt(document.getElementById('return-rental-id').value);
-                const aluguel = DB.rentals.find(r => r.id === id);
-                
-                if (aluguel) {
-                    if (!aluguel.pago && !confirm('Este aluguel não foi pago. Deseja realmente registrar a devolução?')) {
-                        return;
-                    }
-                    
-                    aluguel.devolvido = true;
-                    const product = DB.products.find(p => p.nome === aluguel.produto);
-                    if (product) {
-                        product.quantidadeDisponivel += aluguel.quantidade;
-                    }
-                    DB.save();
-                    loadData();
-                    bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
-                    showToast('Devolução registrada com sucesso!');
-                }
-            });
-            
-            // Gerar relatório
-            document.getElementById('generate-report').addEventListener('click', function() {
-                // Cria um relatório simples em formato de texto
-                const relatorio = `
-                    Relatório Financeiro - ${new Date().toLocaleDateString('pt-BR')}
-                    ===================================
-                    
-                    Total de Produtos: ${DB.products.length}
-                    Total de Aluguéis: ${DB.rentals.length}
-                    Receita Total: ${formatCurrency(DB.rentals.reduce((sum, r) => sum + r.valorTotal, 0))}
-                    Dívidas Totais: ${formatCurrency(DB.debts.reduce((sum, d) => sum + d.valorTotal, 0))}
-                    Saldo Final: ${document.getElementById('final-balance').textContent}
-                    
-                    Últimos Aluguéis:
-                    ${DB.rentals.slice().reverse().slice(0, 5).map(r => 
-                        `${r.cliente} - ${r.produto} - ${formatCurrency(r.valorTotal)} - ${r.pago ? 'Pago' : 'Aberto'}`).join('\n')}
-                    
-                    Últimas Dívidas:
-                    ${DB.debts.slice().reverse().slice(0, 5).map(d => 
-                        `${d.pessoa} - ${d.descricao} - ${formatCurrency(d.valorTotal)} - ${d.pago ? 'Pago' : 'Aberto'}`).join('\n')}
-                `;
-                
-                // Cria um blob com o relatório
-                const blob = new Blob([relatorio], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `relatorio_${new Date().toISOString().slice(0, 10)}.txt`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                showToast('Relatório gerado com sucesso!');
-            });
-            
-            // Configura eventos para edição e exclusão de produtos
-            document.addEventListener('click', function(e) {
-                // Editar produto
-                if (e.target.closest('.edit-product')) {
-                    const id = parseInt(e.target.closest('.edit-product').getAttribute('data-id'));
-                    const produto = DB.products.find(p => p.id === id);
-                    
-                    if (produto) {
-                        document.getElementById('product-name').value = produto.nome;
-                        document.getElementById('product-quantity').value = produto.quantidadeDisponivel;
-                        document.getElementById('product-daily-rate').value = produto.valorDiaria;
-                        
-                        const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
-                        modal.show();
-                        
-                        // Alterar o botão Salvar para Atualizar
-                        const saveBtn = document.getElementById('save-product');
-                        saveBtn.textContent = 'Atualizar';
-                        saveBtn.onclick = function() {
-                            produto.nome = document.getElementById('product-name').value;
-                            produto.quantidadeDisponivel = parseInt(document.getElementById('product-quantity').value);
-                            produto.valorDiaria = parseFloat(document.getElementById('product-daily-rate').value);
-                            
-                            DB.save();
-                            loadData();
-                            modal.hide();
-                            document.getElementById('product-form').reset();
-                            showToast('Produto atualizado com sucesso!');
-                            
-                            // Restaurar o botão Salvar
-                            saveBtn.textContent = 'Salvar';
-                            saveBtn.onclick = originalSaveProductFunction;
-                        };
-                    }
-                }
-                
-                // Excluir produto
-                if (e.target.closest('.delete-product')) {
-                    const id = parseInt(e.target.closest('.delete-product').getAttribute('data-id'));
-                    if (confirm('Tem certeza que deseja excluir este produto?')) {
-                        DB.products = DB.products.filter(p => p.id !== id);
-                        DB.save();
-                        loadData();
-                        showToast('Produto excluído com sucesso!');
-                    }
-                }
-                
-                // Editar dívida
-                if (e.target.closest('.edit-debt')) {
-                    const id = parseInt(e.target.closest('.edit-debt').getAttribute('data-id'));
-                    const divida = DB.debts.find(d => d.id === id);
-                    
-                    if (divida) {
-                        document.getElementById('debt-person').value = divida.pessoa;
-                        document.getElementById('debt-description').value = divida.descricao;
-                        document.getElementById('debt-total').value = divida.valorTotal;
-                        document.getElementById('debt-paid').value = divida.valorPago;
-                        document.getElementById('debt-date').value = divida.data.split('T')[0];
-                        document.getElementById('debt-is-paid').checked = divida.pago;
-                        
-                        const modal = new bootstrap.Modal(document.getElementById('addDebtModal'));
-                        modal.show();
-                        
-                        // Altera o título do modal
-                        document.getElementById('addDebtModalLabel').innerHTML = '<i class="bi bi-credit-card"></i> Editar Dívida';
-                        
-                        // Altera o botão de salvar para atualizar
-                        const saveBtn = document.getElementById('save-debt');
-                        saveBtn.textContent = 'Atualizar';
-                        saveBtn.onclick = function() {
-                            divida.pessoa = document.getElementById('debt-person').value;
-                            divida.descricao = document.getElementById('debt-description').value;
-                            divida.valorTotal = parseFloat(document.getElementById('debt-total').value);
-                            divida.valorPago = parseFloat(document.getElementById('debt-paid').value);
-                            divida.data = document.getElementById('debt-date').value || new Date().toISOString();
-                            divida.pago = document.getElementById('debt-is-paid').checked;
-                            
-                            DB.save();
-                            loadData();
-                            modal.hide();
-                            document.getElementById('debt-form').reset();
-                            showToast('Dívida atualizada com sucesso!');
-                            
-                            // Restaura o modal para adição
-                            document.getElementById('addDebtModalLabel').innerHTML = '<i class="bi bi-credit-card"></i> Nova Dívida';
-                            saveBtn.textContent = 'Salvar';
-                            saveBtn.onclick = originalSaveDebtFunction;
-                        };
-                    }
-                }
-                
-                // Excluir dívida
-                if (e.target.closest('.delete-debt')) {
-                    const id = parseInt(e.target.closest('.delete-debt').getAttribute('data-id'));
-                    if (confirm('Tem certeza que deseja excluir esta dívida?')) {
-                        DB.debts = DB.debts.filter(d => d.id !== id);
-                        DB.save();
-                        loadData();
-                        showToast('Dívida excluída com sucesso!');
-                    }
-                }
-                
-                // Excluir aluguel
-                if (e.target.closest('.delete-rental')) {
-                    const id = parseInt(e.target.closest('.delete-rental').getAttribute('data-id'));
-                    if (confirm('Tem certeza que deseja excluir este aluguel?')) {
-                        DB.rentals = DB.rentals.filter(r => r.id !== id);
-                        DB.save();
-                        loadData();
-                        showToast('Aluguel excluído com sucesso!');
-                    }
-                }
-            });
-            
-            // Salvar a função original do botão Salvar produto
-            const originalSaveProductFunction = document.getElementById('save-product').onclick;
-            
-            // Salvar a função original do botão Salvar dívida
-            const originalSaveDebtFunction = document.getElementById('save-debt').onclick;
-        }
-
-        // Atualiza o valor total do aluguel no modal
-        function updateRentalTotal() {
-            const productName = document.getElementById('rental-product').value;
-            const days = parseInt(document.getElementById('rental-days').value) || 0;
-            const quantity = parseInt(document.getElementById('rental-quantity').value) || 0;
-            
-            if (!productName) {
-                document.getElementById('rental-total').textContent = 'R$ 0,00';
-                return;
-            }
-            
-            const produto = DB.products.find(p => p.nome === productName);
-            if (produto) {
-                const total = days * produto.valorDiaria * quantity;
-                document.getElementById('rental-total').textContent = formatCurrency(total);
-            }
-        }
-
-        // Atualiza a tabela de produtos
-        function updateProductsTable(produtos) {
-            const table = document.getElementById('products-table').querySelector('tbody');
-            table.innerHTML = '';
-            
-            for (const p of produtos) {
-                const totalValue = p.quantidadeDisponivel * p.valorDiaria;
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${p.nome}</td>
-                    <td>${p.quantidadeDisponivel}</td>
-                    <td>${formatCurrency(p.valorDiaria)}</td>
-                    <td>${formatCurrency(totalValue)}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary edit-product" data-id="${p.id}" title="Editar produto">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger delete-product" data-id="${p.id}" title="Excluir produto">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                `;
-                
-                table.appendChild(row);
-            }
-        }
-
-        // Atualiza o dropdown de produtos no modal de aluguel
-        function updateProductDropdown(produtos) {
-            const dropdown = document.getElementById('rental-product');
-            dropdown.innerHTML = '<option value="">Selecione um produto</option>';
-            
-            for (const p of produtos) {
-                const option = document.createElement('option');
-                option.value = p.nome;
-                option.textContent = p.nome;
-                dropdown.appendChild(option);
-            }
-        }
-
-        // Atualiza a tabela de aluguéis
-        function updateRentalsTable(alugueis) {
-            const table = document.getElementById('rentals-table').querySelector('tbody');
-            table.innerHTML = '';
-            
-            for (const a of alugueis) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${a.cliente}</td>
-                    <td>${a.produto}</td>
-                    <td>${formatDate(a.data)}</td>
-                    <td>${a.dias}</td>
-                    <td>${formatCurrency(a.valorTotal)}</td>
-                    <td><span class="badge ${a.pago ? 'badge-paid' : 'badge-unpaid'}">${a.pago ? 'Pago' : 'Aberto'}</span></td>
-                    <td><span class="badge ${a.devolvido ? 'badge-returned' : 'badge-rented'}">${a.devolvido ? 'Devolvido' : 'Em uso'}</span></td>
-                    <td>
-                        ${!a.pago ? `<button class="btn btn-sm btn-outline-success pay-rental" data-id="${a.id}" title="Registrar pagamento">
-                            <i class="bi bi-cash"></i>
-                        </button>` : ''}
-                        ${!a.devolvido ? `<button class="btn btn-sm btn-outline-primary return-rental" data-id="${a.id}" title="Registrar devolução">
-                            <i class="bi bi-arrow-return-left"></i>
-                        </button>` : ''}
-                        <button class="btn btn-sm btn-outline-danger delete-rental" data-id="${a.id}" title="Excluir aluguel">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                `;
-                
-                table.appendChild(row);
-            }
-            
-            // Configura eventos para os botões
-            document.querySelectorAll('.pay-rental').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = parseInt(this.getAttribute('data-id'));
-                    const aluguel = DB.rentals.find(r => r.id === id);
-                    if (aluguel) showPaymentRentalModal(aluguel);
-                });
-            });
-            
-            document.querySelectorAll('.return-rental').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = parseInt(this.getAttribute('data-id'));
-                    const aluguel = DB.rentals.find(r => r.id === id);
-                    if (aluguel) showReturnModal(aluguel);
-                });
-            });
-        }
-
-        // Atualiza a tabela de aluguéis ativos
-        function updateActiveRentalsTable(alugueis) {
-            const table = document.getElementById('active-rentals').querySelector('tbody');
-            table.innerHTML = '';
-            
-            for (const a of alugueis) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${a.cliente}</td>
-                    <td>${a.produto}</td>
-                    <td>${formatDate(a.data)}</td>
-                    <td>${a.dias}</td>
-                    <td>${formatCurrency(a.valorTotal)}</td>
-                    <td><span class="badge ${a.pago ? 'bg-success' : 'bg-danger'}">${a.pago ? 'Pago' : 'Aberto'}</span></td>
-                    <td>
-                        ${!a.pago ? `<button class="btn btn-sm btn-outline-success pay-rental" data-id="${a.id}" title="Registrar pagamento">
-                            <i class="bi bi-cash"></i>
-                        </button>` : ''}
-                        <button class="btn btn-sm btn-primary return-rental" data-id="${a.id}" title="Registrar devolução">
-                            <i class="bi bi-arrow-return-left"></i> Devolver
-                        </button>
-                    </td>
-                `;
-                
-                table.appendChild(row);
-            }
-            
-            // Configura eventos para os botões
-            document.querySelectorAll('.pay-rental').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = parseInt(this.getAttribute('data-id'));
-                    const aluguel = DB.rentals.find(r => r.id === id);
-                    if (aluguel) showPaymentRentalModal(aluguel);
-                });
-            });
-            
-            document.querySelectorAll('.return-rental').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = parseInt(this.getAttribute('data-id'));
-                    const aluguel = DB.rentals.find(r => r.id === id);
-                    if (aluguel) showReturnModal(aluguel);
-                });
-            });
-        }
-
-        // Atualiza a tabela de dívidas
-        function updateDebtsTable(dividas) {
-            const table = document.getElementById('debts-table').querySelector('tbody');
-            table.innerHTML = '';
-            
-            for (const d of dividas) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${d.pessoa}</td>
-                    <td>${d.descricao}</td>
-                    <td>${formatDate(d.data)}</td>
-                    <td>${formatCurrency(d.valorTotal)}</td>
-                    <td>${formatCurrency(d.valorPago)}</td>
-                    <td><span class="badge ${d.pago ? 'bg-success' : 'bg-danger'}">${d.pago ? 'Pago' : 'Aberto'}</span></td>
-                    <td>
-                        ${!d.pago ? `<button class="btn btn-sm btn-outline-success pay-debt" data-id="${d.id}" title="Registrar pagamento">
-                            <i class="bi bi-cash"></i>
-                        </button>` : ''}
-                        <button class="btn btn-sm btn-outline-primary edit-debt" data-id="${d.id}" title="Editar dívida">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger delete-debt" data-id="${d.id}" title="Excluir dívida">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                `;
-                
-                table.appendChild(row);
-            }
-            
-            // Configura eventos para os botões
-            document.querySelectorAll('.pay-debt').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = parseInt(this.getAttribute('data-id'));
-                    const divida = DB.debts.find(d => d.id === id);
-                    if (divida) showPaymentModal(divida);
-                });
-            });
-            
-            document.querySelectorAll('.edit-debt').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = parseInt(this.getAttribute('data-id'));
-                    const divida = DB.debts.find(d => d.id === id);
-                    if (divida) showEditDebtModal(divida);
-                });
-            });
-        }
-
-        // Mostra o modal de pagamento de dívida
-        function showPaymentModal(divida) {
-            document.getElementById('payment-debt-id').value = divida.id;
-            document.getElementById('payment-person').value = divida.pessoa;
-            document.getElementById('payment-description').value = divida.descricao;
-            document.getElementById('payment-total').value = formatCurrency(divida.valorTotal);
-            document.getElementById('payment-already-paid').value = formatCurrency(divida.valorPago);
-            document.getElementById('payment-amount').value = '';
-            
-            new bootstrap.Modal(document.getElementById('paymentModal')).show();
-        }
-
-        // Mostra o modal de pagamento de aluguel
-        function showPaymentRentalModal(aluguel) {
-            document.getElementById('payment-rental-id').value = aluguel.id;
-            document.getElementById('payment-rental-client').value = aluguel.cliente;
-            document.getElementById('payment-rental-product').value = aluguel.produto;
-            document.getElementById('payment-rental-total').value = formatCurrency(aluguel.valorTotal);
-            document.getElementById('payment-rental-amount').value = '';
-            document.getElementById('payment-rental-full').checked = true;
-            document.getElementById('partial-payment-container').style.display = 'none';
-            
-            new bootstrap.Modal(document.getElementById('paymentRentalModal')).show();
-        }
-
-        // Mostra o modal de devolução
-        function showReturnModal(aluguel) {
-            document.getElementById('return-rental-id').value = aluguel.id;
-            document.getElementById('return-client').value = aluguel.cliente;
-            document.getElementById('return-product').value = aluguel.produto;
-            document.getElementById('return-date').value = formatDate(aluguel.data);
-            document.getElementById('return-days').value = aluguel.dias;
-            document.getElementById('return-total').value = formatCurrency(aluguel.valorTotal);
-            document.getElementById('return-payment').value = aluguel.pago ? 'Pago' : 'Pendente';
-            
-            new bootstrap.Modal(document.getElementById('returnModal')).show();
-        }
-
-        // Formata data para exibição
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('pt-BR');
-        }
-
-        // Formata valor monetário
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-        }
-
-        // Mostra uma mensagem toast
-        function showToast(message, type = 'success') {
-            // Remove toast existente se houver
-            const existingToast = document.getElementById('custom-toast');
-            if (existingToast) {
-                existingToast.remove();
-            }
-            
-            // Cria o elemento toast
-            const toast = document.createElement('div');
-            toast.id = 'custom-toast';
-            toast.className = `toast show align-items-center text-white bg-${type}`;
-            toast.style.position = 'fixed';
-            toast.style.bottom = '20px';
-            toast.style.right = '20px';
-            toast.style.zIndex = '9999';
-            
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">
-                        ${message}
                     </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    <div class="mb-3">
+                        <label class="form-label">Descrição</label>
+                        <input type="text" class="form-control" id="debt-description" required>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Valor Total (R$)</label>
+                            <input type="number" step="0.01" class="form-control" id="debt-total" min="0" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Valor Pago (R$)</label>
+                            <input type="number" step="0.01" class="form-control" id="debt-paid" min="0" value="0" required>
+                        </div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="debt-is-paid">
+                        <label class="form-check-label" for="debt-is-paid" style="font-size:0.875rem;">Dívida quitada</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" id="save-debt"><i class="bi bi-check2"></i> Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Debt -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-cash me-2"></i>Registrar Pagamento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="payment-debt-id">
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label">Pessoa</label>
+                        <input type="text" class="form-control" id="payment-person" readonly>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Valor Total</label>
+                        <input type="text" class="form-control" id="payment-total" readonly>
+                    </div>
                 </div>
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // Remove o toast após 3 segundos
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-            
-            // Configura o botão de fechar
-            toast.querySelector('button').addEventListener('click', () => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            });
+                <div class="mb-3">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" class="form-control" id="payment-description" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Já Pago</label>
+                    <input type="text" class="form-control" id="payment-already-paid" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Valor do Pagamento (R$)</label>
+                    <input type="number" step="0.01" class="form-control" id="payment-amount" min="0" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-success" id="save-payment"><i class="bi bi-check2-circle"></i> Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Rental -->
+<div class="modal fade" id="paymentRentalModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-cash me-2"></i>Pagamento de Aluguel</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="payment-rental-id">
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label">Cliente</label>
+                        <input type="text" class="form-control" id="payment-rental-client" readonly>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Valor Total</label>
+                        <input type="text" class="form-control" id="payment-rental-total" readonly>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Produto</label>
+                    <input type="text" class="form-control" id="payment-rental-product" readonly>
+                </div>
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="payment-rental-full" checked>
+                        <label class="form-check-label" for="payment-rental-full" style="font-size:0.875rem;">Pagamento total</label>
+                    </div>
+                </div>
+                <div id="partial-payment-container" style="display:none;">
+                    <label class="form-label">Valor Parcial (R$)</label>
+                    <input type="number" step="0.01" class="form-control" id="payment-rental-amount" min="0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-success" id="save-rental-payment"><i class="bi bi-check2-circle"></i> Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Return -->
+<div class="modal fade" id="returnModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-arrow-return-left me-2"></i>Registrar Devolução</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="return-rental-id">
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label">Cliente</label>
+                        <input type="text" class="form-control" id="return-client" readonly>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Produto</label>
+                        <input type="text" class="form-control" id="return-product" readonly>
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-4">
+                        <label class="form-label">Data</label>
+                        <input type="text" class="form-control" id="return-date" readonly>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Dias</label>
+                        <input type="text" class="form-control" id="return-days" readonly>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Total</label>
+                        <input type="text" class="form-control" id="return-total" readonly>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Status Pagamento</label>
+                    <input type="text" class="form-control" id="return-payment" readonly>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-accent" id="confirm-return"><i class="bi bi-check2-circle"></i> Confirmar Devolução</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// ── DATABASE ──
+const DB = {
+    products: JSON.parse(localStorage.getItem('bp_products')) || [],
+    rentals:  JSON.parse(localStorage.getItem('bp_rentals'))  || [],
+    debts:    JSON.parse(localStorage.getItem('bp_debts'))    || [],
+    save() {
+        localStorage.setItem('bp_products', JSON.stringify(this.products));
+        localStorage.setItem('bp_rentals',  JSON.stringify(this.rentals));
+        localStorage.setItem('bp_debts',    JSON.stringify(this.debts));
+    },
+    nextId: arr => arr.length > 0 ? Math.max(...arr.map(x => x.id)) + 1 : 1
+};
+
+// ── NAVIGATION ──
+const sectionMap = {
+    dashboard: 'dashboard-section',
+    products:  'products-section',
+    rentals:   'rentals-section',
+    returns:   'returns-section',
+    debts:     'debts-section',
+    reports:   'reports-section'
+};
+
+const titleMap = {
+    dashboard: 'Dashboard',
+    products:  'Produtos',
+    rentals:   'Aluguéis',
+    returns:   'Devoluções',
+    debts:     'Dívidas',
+    reports:   'Relatórios'
+};
+
+function showSection(name) {
+    Object.keys(sectionMap).forEach(k => {
+        const el = document.getElementById(sectionMap[k]);
+        el.classList.toggle('section-hidden', k !== name);
+        document.getElementById(k + '-link').classList.toggle('active', k === name);
+    });
+    document.getElementById('topbar-title').textContent = titleMap[name];
+    if (name === 'reports') renderReportCharts();
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+    // date
+    document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' });
+
+    Object.keys(sectionMap).forEach(k => {
+        document.getElementById(k + '-link').addEventListener('click', e => {
+            e.preventDefault();
+            showSection(k);
+            if (k === 'dashboard') refreshDashboard();
+        });
+    });
+
+    setupModals();
+    loadAll();
+    showSection('dashboard');
+});
+
+function loadAll() {
+    renderProductsTable();
+    renderProductDropdown();
+    renderRentalsTable();
+    renderActiveRentals();
+    renderDebtsTable();
+    refreshDashboard();
+}
+
+// ── DASHBOARD ──
+function refreshDashboard() {
+    document.getElementById('total-products').textContent = DB.products.length;
+
+    const totalRev = DB.rentals.reduce((s, r) => s + r.valorTotal, 0);
+    const paid     = DB.rentals.filter(r => r.pago).reduce((s, r) => s + r.valorTotal, 0);
+    document.getElementById('total-revenue').textContent = fmt(totalRev);
+    document.getElementById('paid-rentals').textContent  = fmt(paid);
+    document.getElementById('unpaid-rentals').textContent= fmt(totalRev - paid);
+
+    const totalDebts = DB.debts.reduce((s, d) => s + d.valorTotal, 0);
+    const paidDebts  = DB.debts.reduce((s, d) => s + d.valorPago,  0);
+    document.getElementById('total-debts').textContent       = fmt(totalDebts);
+    document.getElementById('total-debts-report').textContent= fmt(totalDebts);
+    document.getElementById('paid-debts').textContent        = fmt(paidDebts);
+    document.getElementById('unpaid-debts').textContent      = fmt(totalDebts - paidDebts);
+
+    document.getElementById('total-rentals').textContent  = fmt(totalRev);
+    document.getElementById('final-balance').textContent  = fmt(paid - paidDebts);
+
+    // Recent tables
+    const recent5r = DB.rentals.slice().reverse().slice(0,5);
+    const tb1 = document.querySelector('#recent-rentals tbody');
+    tb1.innerHTML = recent5r.length
+        ? recent5r.map(r => `<tr><td>${r.cliente}</td><td>${r.produto}</td><td><span class="badge ${r.pago ? 'badge-paid':'badge-unpaid'}">${r.pago?'Pago':'Aberto'}</span></td></tr>`).join('')
+        : `<tr><td colspan="3" class="text-center text-muted py-3" style="font-size:0.82rem;">Nenhum aluguel registrado</td></tr>`;
+
+    const recent5d = DB.debts.slice().reverse().slice(0,5);
+    const tb2 = document.querySelector('#recent-debts tbody');
+    tb2.innerHTML = recent5d.length
+        ? recent5d.map(d => `<tr><td>${d.pessoa}</td><td>${fmt(d.valorTotal)}</td><td><span class="badge ${d.pago ? 'badge-paid':'badge-unpaid'}">${d.pago?'Pago':'Aberto'}</span></td></tr>`).join('')
+        : `<tr><td colspan="3" class="text-center text-muted py-3" style="font-size:0.82rem;">Nenhuma dívida registrada</td></tr>`;
+}
+
+// ── PRODUCTS ──
+function renderProductsTable() {
+    const tbody = document.querySelector('#products-table tbody');
+    if (!DB.products.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><i class="bi bi-tools"></i><p>Nenhum produto cadastrado</p></div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = DB.products.map(p => `
+        <tr>
+            <td><strong>${p.nome}</strong></td>
+            <td>${p.quantidadeDisponivel}</td>
+            <td>${fmt(p.valorDiaria)}</td>
+            <td>${fmt(p.quantidadeDisponivel * p.valorDiaria)}</td>
+            <td>
+                <div class="action-group">
+                    <button class="btn-icon btn-icon-edit edit-product" data-id="${p.id}" title="Editar produto"><i class="bi bi-pencil"></i></button>
+                    <button class="btn-icon btn-icon-delete delete-product" data-id="${p.id}" title="Excluir produto"><i class="bi bi-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderProductDropdown() {
+    const sel = document.getElementById('rental-product');
+    sel.innerHTML = '<option value="">Selecione um produto</option>';
+    DB.products.forEach(p => {
+        const o = document.createElement('option');
+        o.value = p.nome; o.textContent = p.nome;
+        sel.appendChild(o);
+    });
+}
+
+// ── RENTALS ──
+function renderRentalsTable() {
+    const tbody = document.querySelector('#rentals-table tbody');
+    if (!DB.rentals.length) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="bi bi-cart"></i><p>Nenhum aluguel registrado</p></div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = DB.rentals.map(a => `
+        <tr>
+            <td>${a.cliente}</td>
+            <td>${a.produto}</td>
+            <td>${fmtDate(a.data)}</td>
+            <td>${a.dias}</td>
+            <td><strong>${fmt(a.valorTotal)}</strong></td>
+            <td><span class="badge ${a.pago ? 'badge-paid':'badge-unpaid'}">${a.pago?'Pago':'Aberto'}</span></td>
+            <td><span class="badge ${a.devolvido ? 'badge-returned':'badge-rented'}">${a.devolvido?'Devolvido':'Em uso'}</span></td>
+            <td>
+                <div class="action-group">
+                    ${!a.pago ? `<button class="btn-icon btn-icon-pay pay-rental" data-id="${a.id}" title="Registrar pagamento"><i class="bi bi-cash"></i></button>` : ''}
+                    ${!a.devolvido ? `<button class="btn-icon btn-icon-return return-rental" data-id="${a.id}" title="Registrar devolução"><i class="bi bi-arrow-return-left"></i></button>` : ''}
+                    <button class="btn-icon btn-icon-delete delete-rental" data-id="${a.id}" title="Excluir aluguel"><i class="bi bi-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+    attachRentalEvents('#rentals-table');
+}
+
+function renderActiveRentals() {
+    const active = DB.rentals.filter(r => !r.devolvido);
+    const tbody  = document.querySelector('#active-rentals tbody');
+    if (!active.length) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="bi bi-check2-circle"></i><p>Nenhum aluguel ativo no momento</p></div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = active.map(a => `
+        <tr>
+            <td>${a.cliente}</td>
+            <td>${a.produto}</td>
+            <td>${fmtDate(a.data)}</td>
+            <td>${a.dias}</td>
+            <td><strong>${fmt(a.valorTotal)}</strong></td>
+            <td><span class="badge ${a.pago ? 'badge-paid':'badge-unpaid'}">${a.pago?'Pago':'Aberto'}</span></td>
+            <td>
+                <div class="action-group">
+                    ${!a.pago ? `<button class="btn-icon btn-icon-pay pay-rental" data-id="${a.id}" title="Registrar pagamento"><i class="bi bi-cash"></i></button>` : ''}
+                    <button class="btn btn-accent btn-sm return-rental" data-id="${a.id}"><i class="bi bi-arrow-return-left"></i> Devolver</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+    attachRentalEvents('#active-rentals');
+}
+
+function attachRentalEvents(tableSelector) {
+    document.querySelectorAll(`${tableSelector} .pay-rental`).forEach(btn => {
+        btn.addEventListener('click', () => {
+            const a = DB.rentals.find(r => r.id === +btn.dataset.id);
+            if (a) showPaymentRentalModal(a);
+        });
+    });
+    document.querySelectorAll(`${tableSelector} .return-rental`).forEach(btn => {
+        btn.addEventListener('click', () => {
+            const a = DB.rentals.find(r => r.id === +btn.dataset.id);
+            if (a) showReturnModal(a);
+        });
+    });
+}
+
+// ── DEBTS ──
+function renderDebtsTable() {
+    const tbody = document.querySelector('#debts-table tbody');
+    if (!DB.debts.length) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="bi bi-credit-card"></i><p>Nenhuma dívida registrada</p></div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = DB.debts.map(d => `
+        <tr>
+            <td><strong>${d.pessoa}</strong></td>
+            <td>${d.descricao}</td>
+            <td>${fmtDate(d.data)}</td>
+            <td>${fmt(d.valorTotal)}</td>
+            <td>${fmt(d.valorPago)}</td>
+            <td><span class="badge ${d.pago ? 'badge-paid':'badge-unpaid'}">${d.pago?'Pago':'Aberto'}</span></td>
+            <td>
+                <div class="action-group">
+                    ${!d.pago ? `<button class="btn-icon btn-icon-pay pay-debt" data-id="${d.id}" title="Registrar pagamento"><i class="bi bi-cash"></i></button>` : ''}
+                    <button class="btn-icon btn-icon-edit edit-debt" data-id="${d.id}" title="Editar dívida"><i class="bi bi-pencil"></i></button>
+                    <button class="btn-icon btn-icon-delete delete-debt" data-id="${d.id}" title="Excluir dívida"><i class="bi bi-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+
+    document.querySelectorAll('.pay-debt').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const d = DB.debts.find(x => x.id === +btn.dataset.id);
+            if (d) showPaymentModal(d);
+        });
+    });
+}
+
+// ── MODALS ──
+function setupModals() {
+    // PRODUCT
+    document.getElementById('save-product').addEventListener('click', () => {
+        const nome    = document.getElementById('product-name').value.trim();
+        const qtd     = parseInt(document.getElementById('product-quantity').value);
+        const diaria  = parseFloat(document.getElementById('product-daily-rate').value);
+        if (!nome || isNaN(qtd) || isNaN(diaria)) return;
+
+        DB.products.push({ id: DB.nextId(DB.products), nome, quantidadeDisponivel: qtd, valorDiaria: diaria });
+        DB.save(); loadAll();
+        bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+        document.getElementById('product-form').reset();
+        toast('Produto adicionado com sucesso!');
+    });
+
+    // RENTAL total
+    ['rental-product','rental-days','rental-quantity'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateRentalTotal);
+        document.getElementById(id).addEventListener('change', updateRentalTotal);
+    });
+    document.getElementById('rental-product').addEventListener('change', () => {
+        const p = DB.products.find(x => x.nome === document.getElementById('rental-product').value);
+        document.getElementById('product-info').textContent = p
+            ? `Disponível: ${p.quantidadeDisponivel} | Diária: ${fmt(p.valorDiaria)}` : '—';
+        updateRentalTotal();
+    });
+
+    // SAVE RENTAL
+    document.getElementById('save-rental').addEventListener('click', () => {
+        const productName = document.getElementById('rental-product').value;
+        const product = DB.products.find(p => p.nome === productName);
+        const qty = parseInt(document.getElementById('rental-quantity').value);
+        const days= parseInt(document.getElementById('rental-days').value);
+        const cli = document.getElementById('rental-client').value.trim();
+        if (!product || !cli || isNaN(qty) || isNaN(days)) { toast('Preencha todos os campos!','danger'); return; }
+        if (product.quantidadeDisponivel < qty) { toast('Quantidade insuficiente!','danger'); return; }
+
+        product.quantidadeDisponivel -= qty;
+        DB.rentals.push({
+            id: DB.nextId(DB.rentals), cliente: cli, produto: productName,
+            dias: days, quantidade: qty, valorDiaria: product.valorDiaria,
+            valorTotal: product.valorDiaria * days * qty,
+            pago: document.getElementById('rental-paid').checked,
+            data: new Date().toISOString(), devolvido: false
+        });
+        DB.save(); loadAll();
+        bootstrap.Modal.getInstance(document.getElementById('addRentalModal')).hide();
+        document.getElementById('rental-form').reset();
+        toast('Aluguel registrado com sucesso!');
+    });
+
+    // SAVE DEBT
+    document.getElementById('save-debt').addEventListener('click', saveDivida);
+
+    // SAVE DEBT PAYMENT
+    document.getElementById('save-payment').addEventListener('click', () => {
+        const id  = +document.getElementById('payment-debt-id').value;
+        const d   = DB.debts.find(x => x.id === id);
+        const val = parseFloat(document.getElementById('payment-amount').value);
+        if (d && val > 0) {
+            d.valorPago += val;
+            d.pago = d.valorPago >= d.valorTotal;
+            DB.save(); loadAll();
+            bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+            toast('Pagamento registrado!');
         }
-    </script>
+    });
+
+    // RENTAL PAYMENT
+    document.getElementById('payment-rental-full').addEventListener('change', function() {
+        document.getElementById('partial-payment-container').style.display = this.checked ? 'none' : 'block';
+    });
+    document.getElementById('save-rental-payment').addEventListener('click', () => {
+        const id = +document.getElementById('payment-rental-id').value;
+        const a  = DB.rentals.find(x => x.id === id);
+        if (a) {
+            a.pago = true;
+            DB.save(); loadAll();
+            bootstrap.Modal.getInstance(document.getElementById('paymentRentalModal')).hide();
+            toast('Pagamento registrado!');
+        }
+    });
+
+    // RETURN
+    document.getElementById('confirm-return').addEventListener('click', () => {
+        const id = +document.getElementById('return-rental-id').value;
+        const a  = DB.rentals.find(x => x.id === id);
+        if (a) {
+            if (!a.pago && !confirm('Aluguel não pago. Deseja confirmar a devolução mesmo assim?')) return;
+            a.devolvido = true;
+            const p = DB.products.find(x => x.nome === a.produto);
+            if (p) p.quantidadeDisponivel += a.quantidade;
+            DB.save(); loadAll();
+            bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
+            toast('Devolução registrada!');
+        }
+    });
+
+    // REPORT
+    document.getElementById('generate-report').addEventListener('click', () => {
+        const txt = `Relatório BetoneiraPlus - ${new Date().toLocaleDateString('pt-BR')}
+======================================================
+Produtos: ${DB.products.length}
+Receita Total: ${fmt(DB.rentals.reduce((s,r)=>s+r.valorTotal,0))}
+Dívidas: ${fmt(DB.debts.reduce((s,d)=>s+d.valorTotal,0))}
+
+Aluguéis recentes:
+${DB.rentals.slice().reverse().slice(0,10).map(r=>`  ${r.cliente} | ${r.produto} | ${fmt(r.valorTotal)} | ${r.pago?'Pago':'Aberto'}`).join('\n')}
+
+Dívidas recentes:
+${DB.debts.slice().reverse().slice(0,10).map(d=>`  ${d.pessoa} | ${d.descricao} | ${fmt(d.valorTotal)} | ${d.pago?'Pago':'Aberto'}`).join('\n')}`;
+
+        const blob = new Blob([txt], {type:'text/plain'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `relatorio_${new Date().toISOString().slice(0,10)}.txt`;
+        a.click();
+        toast('Relatório gerado!');
+    });
+
+    // DELEGATED events
+    document.addEventListener('click', e => {
+        if (e.target.closest('.edit-product')) {
+            const id = +e.target.closest('.edit-product').dataset.id;
+            const p  = DB.products.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('product-name').value        = p.nome;
+            document.getElementById('product-quantity').value    = p.quantidadeDisponivel;
+            document.getElementById('product-daily-rate').value  = p.valorDiaria;
+            const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+            modal.show();
+            const btn = document.getElementById('save-product');
+            btn.textContent = 'Atualizar';
+            btn.onclick = () => {
+                p.nome = document.getElementById('product-name').value;
+                p.quantidadeDisponivel = +document.getElementById('product-quantity').value;
+                p.valorDiaria = +document.getElementById('product-daily-rate').value;
+                DB.save(); loadAll(); modal.hide();
+                document.getElementById('product-form').reset();
+                toast('Produto atualizado!');
+                btn.textContent = 'Salvar';
+                btn.onclick = null;
+            };
+        }
+        if (e.target.closest('.delete-product')) {
+            const id = +e.target.closest('.delete-product').dataset.id;
+            if (confirm('Excluir este produto?')) {
+                DB.products = DB.products.filter(p => p.id !== id);
+                DB.save(); loadAll(); toast('Produto excluído!');
+            }
+        }
+        if (e.target.closest('.edit-debt')) {
+            const id = +e.target.closest('.edit-debt').dataset.id;
+            const d  = DB.debts.find(x => x.id === id);
+            if (d) openEditDebt(d);
+        }
+        if (e.target.closest('.delete-debt')) {
+            const id = +e.target.closest('.delete-debt').dataset.id;
+            if (confirm('Excluir esta dívida?')) {
+                DB.debts = DB.debts.filter(d => d.id !== id);
+                DB.save(); loadAll(); toast('Dívida excluída!');
+            }
+        }
+        if (e.target.closest('.delete-rental')) {
+            const id = +e.target.closest('.delete-rental').dataset.id;
+            if (confirm('Excluir este aluguel?')) {
+                DB.rentals = DB.rentals.filter(r => r.id !== id);
+                DB.save(); loadAll(); toast('Aluguel excluído!');
+            }
+        }
+    });
+}
+
+function saveDivida() {
+    const d = {
+        id: DB.nextId(DB.debts),
+        pessoa:     document.getElementById('debt-person').value.trim(),
+        descricao:  document.getElementById('debt-description').value.trim(),
+        valorTotal: parseFloat(document.getElementById('debt-total').value),
+        valorPago:  parseFloat(document.getElementById('debt-paid').value) || 0,
+        data:       document.getElementById('debt-date').value || new Date().toISOString(),
+        pago:       document.getElementById('debt-is-paid').checked
+    };
+    if (!d.pessoa) return;
+    DB.debts.push(d); DB.save(); loadAll();
+    bootstrap.Modal.getInstance(document.getElementById('addDebtModal')).hide();
+    document.getElementById('debt-form').reset();
+    toast('Dívida registrada!');
+}
+
+function openEditDebt(d) {
+    document.getElementById('debt-person').value      = d.pessoa;
+    document.getElementById('debt-description').value = d.descricao;
+    document.getElementById('debt-total').value       = d.valorTotal;
+    document.getElementById('debt-paid').value        = d.valorPago;
+    document.getElementById('debt-date').value        = d.data.split('T')[0];
+    document.getElementById('debt-is-paid').checked   = d.pago;
+    document.getElementById('addDebtModalLabel').innerHTML = '<i class="bi bi-pencil me-2"></i>Editar Dívida';
+    const modal = new bootstrap.Modal(document.getElementById('addDebtModal'));
+    modal.show();
+    const btn = document.getElementById('save-debt');
+    btn.textContent = 'Atualizar';
+    btn.onclick = () => {
+        d.pessoa    = document.getElementById('debt-person').value;
+        d.descricao = document.getElementById('debt-description').value;
+        d.valorTotal= parseFloat(document.getElementById('debt-total').value);
+        d.valorPago = parseFloat(document.getElementById('debt-paid').value);
+        d.data      = document.getElementById('debt-date').value;
+        d.pago      = document.getElementById('debt-is-paid').checked;
+        DB.save(); loadAll(); modal.hide();
+        document.getElementById('debt-form').reset();
+        document.getElementById('addDebtModalLabel').innerHTML = '<i class="bi bi-credit-card me-2"></i>Nova Dívida';
+        toast('Dívida atualizada!');
+        btn.textContent = 'Salvar';
+        btn.onclick = saveDivida;
+    };
+}
+
+function showPaymentModal(d) {
+    document.getElementById('payment-debt-id').value       = d.id;
+    document.getElementById('payment-person').value        = d.pessoa;
+    document.getElementById('payment-description').value   = d.descricao;
+    document.getElementById('payment-total').value         = fmt(d.valorTotal);
+    document.getElementById('payment-already-paid').value  = fmt(d.valorPago);
+    document.getElementById('payment-amount').value        = '';
+    new bootstrap.Modal(document.getElementById('paymentModal')).show();
+}
+
+function showPaymentRentalModal(a) {
+    document.getElementById('payment-rental-id').value      = a.id;
+    document.getElementById('payment-rental-client').value  = a.cliente;
+    document.getElementById('payment-rental-product').value = a.produto;
+    document.getElementById('payment-rental-total').value   = fmt(a.valorTotal);
+    document.getElementById('payment-rental-amount').value  = '';
+    document.getElementById('payment-rental-full').checked  = true;
+    document.getElementById('partial-payment-container').style.display = 'none';
+    new bootstrap.Modal(document.getElementById('paymentRentalModal')).show();
+}
+
+function showReturnModal(a) {
+    document.getElementById('return-rental-id').value = a.id;
+    document.getElementById('return-client').value    = a.cliente;
+    document.getElementById('return-product').value   = a.produto;
+    document.getElementById('return-date').value      = fmtDate(a.data);
+    document.getElementById('return-days').value      = a.dias;
+    document.getElementById('return-total').value     = fmt(a.valorTotal);
+    document.getElementById('return-payment').value   = a.pago ? 'Pago' : 'Pendente';
+    new bootstrap.Modal(document.getElementById('returnModal')).show();
+}
+
+// ── CHARTS ──
+let chartR = null, chartD = null;
+function renderReportCharts() {
+    refreshDashboard();
+
+    const paid   = DB.rentals.filter(r=>r.pago).reduce((s,r)=>s+r.valorTotal,0);
+    const unpaid = DB.rentals.filter(r=>!r.pago).reduce((s,r)=>s+r.valorTotal,0);
+    const dPaid  = DB.debts.reduce((s,d)=>s+d.valorPago,0);
+    const dUnpaid= DB.debts.reduce((s,d)=>s+(d.valorTotal-d.valorPago),0);
+
+    const rcCtx = document.getElementById('rentalsChart').getContext('2d');
+    if (chartR) chartR.destroy();
+    chartR = new Chart(rcCtx, {
+        type: 'doughnut',
+        data: { labels:['Recebidos','Em Aberto'], datasets:[{ data:[paid,unpaid], backgroundColor:['#17a86e','#e03c3c'], borderWidth:0 }] },
+        options: { responsive:true, plugins:{ legend:{ position:'bottom' }, title:{ display:true, text:'Aluguéis — Recebido vs Aberto' } } }
+    });
+
+    const dcCtx = document.getElementById('debtsChart').getContext('2d');
+    if (chartD) chartD.destroy();
+    chartD = new Chart(dcCtx, {
+        type: 'doughnut',
+        data: { labels:['Pagas','Em Aberto'], datasets:[{ data:[dPaid,dUnpaid], backgroundColor:['#17a86e','#f0a500'], borderWidth:0 }] },
+        options: { responsive:true, plugins:{ legend:{ position:'bottom' }, title:{ display:true, text:'Dívidas — Pagas vs Pendentes' } } }
+    });
+}
+
+// ── HELPERS ──
+function updateRentalTotal() {
+    const pn  = document.getElementById('rental-product').value;
+    const d   = parseInt(document.getElementById('rental-days').value) || 0;
+    const q   = parseInt(document.getElementById('rental-quantity').value) || 0;
+    const p   = DB.products.find(x => x.nome === pn);
+    document.getElementById('rental-total').textContent = p ? fmt(p.valorDiaria * d * q) : 'R$ 0,00';
+}
+
+function fmt(v) {
+    return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
+}
+
+function fmtDate(s) {
+    return new Date(s).toLocaleDateString('pt-BR');
+}
+
+function toast(msg, type='success') {
+    const el = document.createElement('div');
+    el.className = `toast-custom ${type}`;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity 0.3s'; setTimeout(()=>el.remove(),300); }, 2800);
+}
+</script>
 </body>
 </html>
